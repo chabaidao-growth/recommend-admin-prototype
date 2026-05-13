@@ -1,0 +1,513 @@
+.pageStack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.toolbar,
+.toolbarCompact,
+.footerActions,
+.cardActions,
+.inlineActions,
+.toggleRow,
+.batchBar,
+.footerStrip,
+.optionRow,
+.hitBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.toolbar {
+  justify-content: space-between;
+}
+
+.toolbarCompact {
+  min-width: min(100%, 520px);
+}
+
+.searchInput {
+  width: min(360px, 100%);
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-element);
+  background: var(--surface);
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.poolCard {
+  padding: 22px;
+}
+
+.poolCardHeader,
+.selectionRow,
+.planMiniCard,
+.traceCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.inlineMeta,
+.inlineTags {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+}
+
+.mutedText {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.detailHero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+}
+
+.fieldGrow {
+  flex: 1 1 360px;
+}
+
+.detailMeta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 16px;
+  min-width: 360px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--font-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-label);
+}
+
+.infoBanner,
+.lockedRule {
+  padding: 12px 14px;
+  border-radius: var(--radius-element);
+  background: var(--bg);
+  color: var(--text-secondary);
+}
+
+.lockedRule {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+.batchBar {
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.table {
+  width: 100%;
+}
+
+.tableHead,
+.tableRow,
+.tableRowConflict,
+.slotTableHead,
+.slotItem,
+.slotItemDragging,
+.sortableRow,
+.sortableRowDragging {
+  display: grid;
+  align-items: center;
+  gap: 16px;
+}
+
+.tableHead {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding: 0 24px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-label);
+}
+
+.tableRow,
+.tableRowConflict {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tableRowConflict {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 18px 24px 24px;
+}
+
+.importGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.invalidToken {
+  padding: 10px 12px;
+  background: var(--color-red-bg);
+  color: var(--color-red);
+  border-radius: var(--radius-element);
+}
+
+.formGrid,
+.formGridTriple,
+.previewConfig,
+.metricGrid,
+.filterPanel,
+.twoColumn,
+.combinationLayout,
+.previewCards,
+.chipWrap,
+.traceList {
+  display: grid;
+  gap: 16px;
+}
+
+.formGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.formGridTriple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.modeGroup {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.modeCard,
+.modeCardActive,
+.optionCard,
+.optionCardActive {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  padding: 16px;
+  text-align: left;
+}
+
+.modeCardActive,
+.optionCardActive {
+  border-color: var(--color-blue);
+  background: rgba(59, 130, 246, 0.04);
+  box-shadow: var(--shadow-md);
+}
+
+.modeCardHeader,
+.panelTitleStack {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panelTitleStack {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.twoColumn {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.selectionList,
+.planCardList {
+  display: flex;
+  flex-direction: column;
+}
+
+.selectionRow,
+.planMiniCard,
+.conflictItem {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sortableRow,
+.sortableRowDragging {
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sortableRowDragging,
+.slotItemDragging {
+  box-shadow: var(--shadow-float);
+  background: #fff;
+}
+
+.dragHandle {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: grab;
+  padding: 0;
+  width: 24px;
+}
+
+.metricGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.combinationLayout {
+  grid-template-columns: minmax(0, 1fr) 360px;
+  align-items: start;
+}
+
+.slotTableHead {
+  grid-template-columns: 24px 64px minmax(180px, 1.2fr) 1fr 1.2fr auto;
+  padding: 0 24px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-label);
+}
+
+.slotList {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slotItem,
+.slotItemDragging {
+  grid-template-columns: 24px 64px minmax(180px, 1.2fr) 1fr 1.2fr auto;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-element);
+  background: var(--surface);
+}
+
+.slotIndex,
+.readonlyCell {
+  color: var(--text-secondary);
+}
+
+.footerStrip {
+  padding: 0 16px 16px;
+}
+
+.previewConfig {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 20px 24px 0;
+}
+
+.mobileFrame {
+  margin: 20px 24px 24px;
+  width: min(100%, 320px);
+  padding: 16px 12px;
+  border-radius: 24px;
+  border: 4px solid var(--border);
+  box-shadow: var(--shadow-float);
+  background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+}
+
+.mobileHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.mobileScroll {
+  display: flex;
+  gap: 12px;
+  overflow: auto;
+  padding-bottom: 4px;
+}
+
+.mobileCard,
+.previewCard {
+  position: relative;
+  min-width: 220px;
+  padding: 18px 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.mobileBadge,
+.previewBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--color-purple);
+  color: #fff;
+}
+
+.planCardList {
+  gap: 12px;
+  padding: 18px;
+}
+
+.planMiniCard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  align-items: flex-start;
+}
+
+.planMiniCard span {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+}
+
+.scopeCard {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.optionRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.chipWrap {
+  grid-template-columns: repeat(auto-fit, minmax(180px, max-content));
+}
+
+.conflictItem {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-element);
+  background: var(--bg);
+}
+
+.filterPanel {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.chartWrap {
+  height: 360px;
+  padding: 12px 24px 24px;
+}
+
+.previewCards {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.previewEmpty {
+  min-height: 68px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--border-hover);
+  border-radius: 14px;
+  color: var(--text-muted);
+}
+
+.traceList {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.traceCard {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: #fff;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.traceCard p {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+}
+
+.skipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.skipList span {
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  background: #f3f4f6;
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+}
+
+.codeBlock {
+  padding: 18px;
+  border-radius: var(--radius-panel);
+  background: #101826;
+  color: #dde7ff;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 1080px) {
+  .metricGrid,
+  .formGrid,
+  .formGridTriple,
+  .modeGroup,
+  .twoColumn,
+  .combinationLayout,
+  .filterPanel,
+  .previewConfig,
+  .detailMeta {
+    grid-template-columns: 1fr;
+  }
+
+  .slotTableHead,
+  .slotItem,
+  .slotItemDragging,
+  .tableHead,
+  .tableRow,
+  .tableRowConflict {
+    grid-template-columns: 1fr;
+  }
+
+  .detailHero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

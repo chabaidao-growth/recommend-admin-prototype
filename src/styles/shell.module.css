@@ -1,0 +1,145 @@
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+}
+
+.sidebar {
+  background:
+    linear-gradient(180deg, rgba(50, 184, 210, 0.08) 0%, rgba(2, 4, 5, 0) 35%),
+    #060B0E;
+  color: rgba(232, 244, 246, 0.86);
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  border-right: 1px solid #12242B;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brandMark {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  background: linear-gradient(135deg, #32B8D2 0%, #E2D9A5 100%);
+}
+
+.brand strong,
+.brand span {
+  display: block;
+}
+
+.brand span {
+  color: #5C7A83;
+  font-size: var(--font-sm);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.navLink {
+  padding: 10px 16px;
+  border-left: 3px solid transparent;
+  color: #5C7A83;
+  transition: color 0.15s ease;
+}
+
+.navLink:hover {
+  color: #B0C8CE;
+}
+
+.navLinkActive {
+  color: #E8F4F6;
+  border-left-color: #32B8D2;
+  background: rgba(50, 184, 210, 0.08);
+}
+
+.sidebarFooter {
+  margin-top: auto;
+  padding: 16px;
+  border-radius: var(--radius-panel);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sidebarFooter span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: var(--font-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5C7A83;
+}
+
+.sidebarFooter p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 28px;
+  background: #060B0E;
+  border-bottom: 1px solid #12242B;
+}
+
+.userCard {
+  padding: 8px 16px;
+  background: #0A1318;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-element);
+  white-space: nowrap;
+}
+
+.userCard span,
+.userCard strong {
+  display: block;
+}
+
+.userCard span {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
+.userCard strong {
+  margin-top: 2px;
+  font-size: var(--font-md);
+  color: var(--text-main);
+}
+
+.content {
+  padding: 28px;
+}
+
+@media (max-width: 1080px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    min-height: auto;
+  }
+}
