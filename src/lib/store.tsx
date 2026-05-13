@@ -130,7 +130,7 @@ export function AdminStoreProvider({ children }: PropsWithChildren) {
         sortDimension: 'SALES_COUNT',
         timeWindow: '7D',
         fallbackStrategyId: 'strategy-hot-all',
-        salesDataSource: 'NATIONAL',
+        salesDataSource: 'STORE',
         createdAt: '2026-03-16 10:05',
         createdBy: CURRENT_USER,
         manualProductIds: [],

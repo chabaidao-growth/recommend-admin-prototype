@@ -280,7 +280,7 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
       sortDimension: strategy.sortDimension,
       timeWindow: strategy.timeWindow,
       salesDataSource: strategy.salesDataSource,
-      fallbackDataSource: 'NATIONAL',
+      fallbackDataSource: 'STORE',
       status: strategy.status,
     }
   }, [strategy.id])
@@ -389,7 +389,7 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
           mode: values.mode,
           sortDimension: values.sortDimension || 'SALES_COUNT',
           timeWindow: values.timeWindow || '7D',
-          salesDataSource: values.salesDataSource || strategy.salesDataSource || 'NATIONAL',
+          salesDataSource: values.salesDataSource || strategy.salesDataSource || 'STORE',
           fallbackStrategyId: strategy.fallbackStrategyId,
           manualProductIds: manualProductIds,
           filterUnavailable: true,
@@ -953,7 +953,7 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
                     </Flex>
                   </Form.Item>
                   <Form.Item label="兜底数据范围">
-                    <Input value="使用全国近 7 天热销 GMV 数据" disabled />
+                    <Input value="使用门店近 7 天热销 GMV 数据" disabled />
                   </Form.Item>
                 </>
               )}

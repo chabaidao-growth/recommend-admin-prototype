@@ -135,7 +135,7 @@ const strategies: Strategy[] = [
     manualProductIds: [],
     filterUnavailable: true,
     kind: 'SYSTEM',
-    salesDataSource: 'NATIONAL',
+    salesDataSource: 'STORE',
   },
   {
     id: 'strategy-new-seasonal',
