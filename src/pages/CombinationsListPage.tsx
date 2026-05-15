@@ -18,12 +18,6 @@ import {
 import { useAdminStore } from '../lib/store'
 import type { Combination } from '../lib/types'
 
-const RESOURCE_SLOT_OPTIONS = [
-  { value: '0013', label: '置顶营销素材-0013', slotCount: 3 },
-  { value: '0014', label: '置顶营销素材-0014', slotCount: 3 },
-  { value: '0015', label: '置顶营销素材-0015', slotCount: 6 },
-]
-
 function deriveBusinessUnit(
   state: ReturnType<typeof useAdminStore>['state'],
   combinationId: string,
@@ -96,7 +90,7 @@ export function CombinationsListPage() {
       name: combination.name,
       id: combination.id,
       status: combination.status,
-      slotCount: combination.slots.length,
+      slotCount: combination.slotCount,
       coverage,
       createdAt: combination.createdAt,
       businessUnit,
@@ -149,15 +143,12 @@ export function CombinationsListPage() {
       ),
     },
     {
-      title: '资源位',
-      key: 'resourceSlot',
-      width: 180,
-      ellipsis: true,
-      render: (_, record) => {
-        const r = state.combinations.find((c) => c.id === record.id)?.resourceSlotId
-        const label = r ? RESOURCE_SLOT_OPTIONS.find((o) => o.value === r)?.label : '—'
-        return <Typography.Text>{label ?? '—'}</Typography.Text>
-      },
+      title: '坑位数',
+      key: 'slotCount',
+      width: 100,
+      align: 'right' as const,
+      dataIndex: 'slotCount',
+      render: (value: number) => String(value),
     },
     {
       title: '覆盖商品数',
@@ -229,7 +220,7 @@ export function CombinationsListPage() {
           策略组合
         </Typography.Title>
         <Typography.Text type="secondary">
-          管理资源位编排与选品逻辑，覆盖全平台推荐场景。
+          管理策略编排与选品逻辑，覆盖全平台推荐场景。
         </Typography.Text>
       </Space>
 

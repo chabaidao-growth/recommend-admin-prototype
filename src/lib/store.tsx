@@ -42,7 +42,7 @@ export const CURRENT_USER_ROLE: 'SUPER_ADMIN' | 'CUSTOM' = 'SUPER_ADMIN'
 
 const STORAGE_KEY = 'recommend-admin-store'
 const VERSION_KEY = 'recommend-admin-data-version'
-const DATA_VERSION = '20260427v19'
+const DATA_VERSION = '20260515v1'
 const AdminStoreContext = createContext<AdminStoreValue | null>(null)
 
 function replaceItem<T extends { id: string }>(items: T[], next: T) {
@@ -67,7 +67,7 @@ export function AdminStoreProvider({ children }: PropsWithChildren) {
         !parsed.users ||
         !parsed.roles ||
         (parsed.users?.[0] && !('roleIds' in parsed.users[0])) ||
-        (parsed.combinations?.[0] && !('resourceSlotId' in parsed.combinations[0]))
+        (parsed.combinations?.[0] && !('slotCount' in parsed.combinations[0]))
       ) {
         return initialState
       }
@@ -185,10 +185,10 @@ export function AdminStoreProvider({ children }: PropsWithChildren) {
         status: 'ACTIVE',
         createdAt: '2026-03-16 10:20',
         createdBy: CURRENT_USER,
-        resourceSlotId: '',
+        slotCount: 6,
         categoryLimit: null,  // 已废弃
         sessionDedup: true,
-        slots: [],
+        slots: Array.from({ length: 6 }, () => ({ id: createId('slot'), strategyId: null as string | null })),
       }
       setState((current) => ({
         ...current,

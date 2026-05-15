@@ -27,12 +27,14 @@ import {
   Empty,
   Flex,
   Input,
+  InputNumber,
   message,
   Modal,
   Row,
   Select,
   Space,
   Tag,
+  Tooltip,
   Typography,
 } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
@@ -42,12 +44,6 @@ import { CURRENT_USER, useAdminStore } from '../lib/store'
 import type { Combination, CombinationSlot } from '../lib/types'
 
 const GROUP_COLORS = ['#1677ff', '#fa8c16', '#52c41a', '#722ed1', '#eb2f96', '#13c2c2']
-
-const RESOURCE_SLOT_OPTIONS = [
-  { value: '0013', label: '置顶营销素材-0013', slotCount: 3 },
-  { value: '0014', label: '置顶营销素材-0014', slotCount: 3 },
-  { value: '0015', label: '置顶营销素材-0015', slotCount: 6 },
-]
 
 export function CombinationEditPage() {
   const navigate = useNavigate()
@@ -95,8 +91,8 @@ export function CombinationEditPage() {
     if ((location.state as any)?.initialMode === 'edit') setIsEditing(true)
   }, [])
 
-  // 资源位决定坑位数：自动补齐或截断 slots
-  const targetSlotCount = RESOURCE_SLOT_OPTIONS.find((o) => o.value === draft?.resourceSlotId)?.slotCount ?? 0
+  // 坑位数变化时自动补齐或截断 slots
+  const targetSlotCount = draft?.slotCount ?? 0
   useEffect(() => {
     if (!draft || targetSlotCount === 0) return
     const current = draft.slots.length
@@ -115,7 +111,7 @@ export function CombinationEditPage() {
       slots = slots.slice(0, targetSlotCount)
     }
     setDraft({ ...draft, slots })
-  }, [draft?.resourceSlotId, targetSlotCount])
+  }, [draft?.slotCount, targetSlotCount])
 
   if (!combination || !draft) {
     return (
@@ -151,10 +147,10 @@ export function CombinationEditPage() {
       })
       return
     }
-    if (!draft.resourceSlotId) {
+    if (!draft.slotCount || draft.slotCount < 1 || draft.slotCount > 50) {
       Modal.warning({
         title: '保存失败',
-        content: '请选择资源位',
+        content: '坑位数必须在 1-50 之间',
         okText: '知道了',
       })
       return
@@ -283,19 +279,29 @@ export function CombinationEditPage() {
                   <Typography.Text type="secondary" style={{ fontSize: 12 }}>（系统自动生成，用于装修配置）</Typography.Text>
                 </Flex>
                 <Flex align="center" gap={12}>
-                  <Typography.Text style={{ width: 72, flexShrink: 0 }}>资源位</Typography.Text>
+                  <Typography.Text style={{ width: 72, flexShrink: 0 }}>坑位数</Typography.Text>
                 {readonly ? (
-                  <Typography.Text>
-                    {RESOURCE_SLOT_OPTIONS.find((o) => o.value === draft.resourceSlotId)?.label ?? '—'}
-                  </Typography.Text>
+                  <Typography.Text>{draft.slotCount}</Typography.Text>
+                ) : !isNewSession ? (
+                  <Tooltip title="保存后不可修改坑位数，如需调整请通过「复制」生成新组合">
+                    <InputNumber
+                      value={draft.slotCount}
+                      min={1}
+                      max={50}
+                      precision={0}
+                      disabled
+                      style={{ width: 120 }}
+                    />
+                  </Tooltip>
                 ) : (
-                  <Select
-                    value={draft.resourceSlotId || undefined}
-                    placeholder="请选择资源位"
-                    onChange={(value) => setDraft({ ...draft, resourceSlotId: value || '' })}
-                    allowClear
-                    style={{ width: 240 }}
-                    options={RESOURCE_SLOT_OPTIONS}
+                  <InputNumber
+                    value={draft.slotCount}
+                    onChange={(value) => setDraft({ ...draft, slotCount: value ?? 0 })}
+                    min={1}
+                    max={50}
+                    precision={0}
+                    placeholder="请输入坑位数（1-50）"
+                    style={{ width: 160 }}
                   />
                 )}
               </Flex>
@@ -306,13 +312,13 @@ export function CombinationEditPage() {
             <Card
               title={
                 <Flex align="center" gap={12}>
-                  <span>坑位配置（共 {targetSlotCount} 个坑位，由资源位决定）</span>
+                  <span>坑位配置（共 {targetSlotCount} 个坑位）</span>
                   <Typography.Text type="secondary">覆盖 {coverage} 件商品</Typography.Text>
                 </Flex>
               }
             >
               {targetSlotCount === 0 ? (
-                <Empty description="请先选择资源位" />
+                <Empty description="请输入坑位数" />
               ) : (
                 <Flex vertical gap={16}>
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

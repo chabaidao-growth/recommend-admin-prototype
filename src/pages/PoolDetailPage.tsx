@@ -444,7 +444,7 @@ export function PoolDetailPage() {
           <Alert
             type="info"
             showIcon
-            message="系统内置全量池，接入商品货架实时更新，商品由系统自动维护，不支持手动增删。"
+            message="系统内置全量池，接入饮品货架实时更新，商品由系统自动维护，不支持手动增删。"
             style={{ marginBottom: 16 }}
           />
         )}

@@ -81,7 +81,7 @@ export interface Combination {
   status: CombinationStatus
   createdAt: string
   createdBy: string
-  resourceSlotId: string
+  slotCount: number
   slots: CombinationSlot[]
   categoryLimit?: number | null  // 已废弃，保留兼容
   sessionDedup: boolean

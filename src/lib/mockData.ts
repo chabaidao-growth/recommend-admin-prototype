@@ -55,7 +55,7 @@ const pools: Pool[] = [
   {
     id: 'pool-all',
     name: 'ALL 全量池',
-    description: '系统内置全量池，包含所有在售商品',
+    description: '系统内置全量池，包含所有饮品',
     status: 'ACTIVE',
     createdAt: '2026-01-02 10:30',
     createdBy: 'system',
@@ -197,7 +197,7 @@ const combinations: Combination[] = [
     status: 'ACTIVE',
     createdAt: '2026-02-25 18:20',
     createdBy: '陈悦',
-    resourceSlotId: '0013',
+    slotCount: 3,
     categoryLimit: 2,
     sessionDedup: true,
     slots: [
@@ -212,7 +212,7 @@ const combinations: Combination[] = [
     status: 'ACTIVE',
     createdAt: '2026-03-04 15:40',
     createdBy: '张运营',
-    resourceSlotId: '0013',
+    slotCount: 3,
     categoryLimit: 1,
     sessionDedup: true,
     slots: [
@@ -227,7 +227,7 @@ const combinations: Combination[] = [
     status: 'ACTIVE',
     createdAt: '2026-03-12 10:30',
     createdBy: '张运营',
-    resourceSlotId: '0014',
+    slotCount: 3,
     categoryLimit: 2,
     sessionDedup: true,
     slots: [
@@ -242,7 +242,7 @@ const combinations: Combination[] = [
     status: 'ACTIVE',
     createdAt: '2026-03-18 09:15',
     createdBy: '陈悦',
-    resourceSlotId: '0015',
+    slotCount: 6,
     categoryLimit: 1,
     sessionDedup: true,
     slots: [
@@ -260,7 +260,7 @@ const combinations: Combination[] = [
     status: 'INACTIVE',
     createdAt: '2026-03-22 14:50',
     createdBy: '李选品',
-    resourceSlotId: '0013',
+    slotCount: 3,
     categoryLimit: 2,
     sessionDedup: true,
     slots: [
@@ -275,7 +275,7 @@ const combinations: Combination[] = [
     status: 'ACTIVE',
     createdAt: '2026-04-01 08:30',
     createdBy: '张运营',
-    resourceSlotId: '0014',
+    slotCount: 3,
     categoryLimit: 1,
     sessionDedup: true,
     slots: [
@@ -290,7 +290,7 @@ const combinations: Combination[] = [
     status: 'ACTIVE',
     createdAt: '2026-04-08 11:20',
     createdBy: '张运营',
-    resourceSlotId: '0015',
+    slotCount: 6,
     categoryLimit: 3,
     sessionDedup: true,
     slots: [
@@ -308,7 +308,7 @@ const combinations: Combination[] = [
     status: 'INACTIVE',
     createdAt: '2026-04-15 16:40',
     createdBy: '陈悦',
-    resourceSlotId: '0015',
+    slotCount: 6,
     categoryLimit: 2,
     sessionDedup: true,
     slots: [
