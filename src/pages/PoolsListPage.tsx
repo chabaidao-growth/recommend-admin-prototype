@@ -51,10 +51,10 @@ export function PoolsListPage() {
   // 启用 vs 停用
   const activePools = otherPools
     .filter((pool) => pool.status === 'ACTIVE')
-    .sort((a, b) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime())
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   const inactivePools = otherPools
     .filter((pool) => pool.status === 'INACTIVE')
-    .sort((a, b) => new Date(b.updatedAt ?? b.createdAt).getTime() - new Date(a.updatedAt ?? a.createdAt).getTime())
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   function doCreate(navigateToDetail: boolean) {
     form.validateFields().then((values) => {
