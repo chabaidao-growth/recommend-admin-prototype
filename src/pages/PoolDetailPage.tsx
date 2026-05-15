@@ -499,7 +499,8 @@ export function PoolDetailPage() {
               : undefined
           }
           pagination={{
-            pageSize: 10,
+            pageSize: 50,
+            pageSizeOptions: [50, 100, 200],
             showSizeChanger: true,
             showTotal: (total) => `共 ${total} 件商品`,
           }}
