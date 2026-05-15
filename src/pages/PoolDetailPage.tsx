@@ -308,57 +308,71 @@ export function PoolDetailPage() {
                 </Tooltip>
               )}
               {isOwner ? (
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={() => {
-                    if (references.length > 0) {
-                      Modal.warning({
-                        title: '无法删除',
-                        content: `该选品池被 ${references.length} 个排序策略使用，无法删除。请先解除关联。`,
-                      })
-                    } else {
-                      Modal.confirm({
-                        title: '确认删除',
-                        icon: null,
-                        content: (
-                          <Flex vertical gap={12}>
-                            <Text>确认删除选品池「{pool.name}」吗？删除后不可恢复。</Text>
-                            <div>
-                              <Text type="secondary" style={{ fontSize: 13 }}>请输入选品池名称以确认：</Text>
-                              <Input
-                                placeholder={pool.name}
-                                id="delete-confirm-input"
-                                style={{ marginTop: 4 }}
-                                onChange={(e) => {
-                                  const btn = document.querySelector('.ant-modal-confirm-btns .ant-btn-dangerous') as HTMLButtonElement | null
-                                  if (btn) btn.disabled = e.target.value.trim() !== pool.name
-                                }}
-                              />
-                            </div>
-                          </Flex>
-                        ),
-                        okText: '确认删除',
-                        cancelText: '取消',
-                        okButtonProps: { danger: true, disabled: true },
-                        onOk() {
-                          const input = document.getElementById('delete-confirm-input') as HTMLInputElement | null
-                          if (input?.value.trim() !== pool.name) {
-                            message.error('名称输入不一致，无法删除')
-                            return Promise.reject()
-                          }
-                          deletePool(pool.id)
-                          message.success('已删除')
-                          navigate('/pools')
-                        },
-                      })
-                    }
-                  }}
-                >
-                  删除
-                </Button>
+                pool.status === 'ACTIVE' ? (
+                  <Tooltip title="请先停用后再删除">
+                    <span>
+                      <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        disabled
+                      >
+                        删除
+                      </Button>
+                    </span>
+                  </Tooltip>
+                ) : (
+                  <Button
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => {
+                      if (references.length > 0) {
+                        Modal.warning({
+                          title: '无法删除',
+                          content: `该选品池被 ${references.length} 个排序策略使用，无法删除。请先解除关联。`,
+                        })
+                      } else {
+                        Modal.confirm({
+                          title: '确认删除',
+                          icon: null,
+                          content: (
+                            <Flex vertical gap={12}>
+                              <Text>确认删除选品池「{pool.name}」吗？删除后不可恢复。</Text>
+                              <div>
+                                <Text type="secondary" style={{ fontSize: 13 }}>请输入选品池名称以确认：</Text>
+                                <Input
+                                  placeholder={pool.name}
+                                  id="delete-confirm-input"
+                                  style={{ marginTop: 4 }}
+                                  onChange={(e) => {
+                                    const btn = document.querySelector('.ant-modal-confirm-btns .ant-btn-dangerous') as HTMLButtonElement | null
+                                    if (btn) btn.disabled = e.target.value.trim() !== pool.name
+                                  }}
+                                />
+                              </div>
+                            </Flex>
+                          ),
+                          okText: '确认删除',
+                          cancelText: '取消',
+                          okButtonProps: { danger: true, disabled: true },
+                          onOk() {
+                            const input = document.getElementById('delete-confirm-input') as HTMLInputElement | null
+                            if (input?.value.trim() !== pool.name) {
+                              message.error('名称输入不一致，无法删除')
+                              return Promise.reject()
+                            }
+                            deletePool(pool.id)
+                            message.success('已删除')
+                            navigate('/pools')
+                          },
+                        })
+                      }
+                    }}
+                  >
+                    删除
+                  </Button>
+                )
               ) : (
-                <Tooltip title="仅创建人可操作">
+                <Tooltip title={pool.status === 'ACTIVE' ? '请先停用后再删除' : '仅创建人可操作'}>
                   <Button danger icon={<DeleteOutlined />} disabled>
                     删除
                   </Button>

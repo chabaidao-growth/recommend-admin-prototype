@@ -216,7 +216,7 @@ export function StrategiesListPage() {
                       key: 'delete',
                       label: <span style={{ color: 'var(--ant-color-error)' }}>删除</span>,
                       icon: <DeleteOutlined style={{ color: 'var(--ant-color-error)' }} />,
-                      disabled: !canOperate || hasRefs,
+                      disabled: !canOperate || hasRefs || isActive,
                       onClick: () => handleDelete(record),
                     },
                   ],

@@ -237,7 +237,15 @@ export function CombinationEditPage() {
                     <>
                       <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)}>编辑</Button>
                       <Button onClick={handleToggleStatus}>{draft.status === 'ACTIVE' ? '停用' : '启用'}</Button>
-                      <Button danger icon={<DeleteOutlined />} onClick={handleDelete}>删除</Button>
+                      {draft.status === 'ACTIVE' ? (
+                        <Tooltip title="请先停用后再删除">
+                          <span>
+                            <Button danger icon={<DeleteOutlined />} disabled>删除</Button>
+                          </span>
+                        </Tooltip>
+                      ) : (
+                        <Button danger icon={<DeleteOutlined />} onClick={handleDelete}>删除</Button>
+                      )}
                     </>
                   ) : (
                     <>

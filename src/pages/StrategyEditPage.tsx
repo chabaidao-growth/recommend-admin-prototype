@@ -537,13 +537,29 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
                     <>
                       <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)}>编辑</Button>
                       <Button onClick={handleToggleStatus}>{isActive ? '停用' : '启用'}</Button>
-                      <Button danger icon={<DeleteOutlined />} onClick={handleDelete}>删除</Button>
+                      {isActive ? (
+                        <Tooltip title="请先停用后再删除">
+                          <span>
+                            <Button danger icon={<DeleteOutlined />} disabled>删除</Button>
+                          </span>
+                        </Tooltip>
+                      ) : (
+                        <Button danger icon={<DeleteOutlined />} onClick={handleDelete}>删除</Button>
+                      )}
                     </>
                   ) : (
                     <>
                       <Tooltip title="仅创建人可操作"><Button icon={<EditOutlined />} disabled>编辑</Button></Tooltip>
                       <Tooltip title="仅创建人可操作"><Button disabled>{isActive ? '停用' : '启用'}</Button></Tooltip>
-                      <Tooltip title="仅创建人可操作"><Button danger icon={<DeleteOutlined />} disabled>删除</Button></Tooltip>
+                      {isActive ? (
+                        <Tooltip title="请先停用后再删除">
+                          <span>
+                            <Button danger icon={<DeleteOutlined />} disabled>删除</Button>
+                          </span>
+                        </Tooltip>
+                      ) : (
+                        <Tooltip title="仅创建人可操作"><Button danger icon={<DeleteOutlined />} disabled>删除</Button></Tooltip>
+                      )}
                     </>
                   )}
                 </>
