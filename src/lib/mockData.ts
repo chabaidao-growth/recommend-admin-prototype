@@ -13,6 +13,8 @@ import type {
   User,
 } from './types'
 
+export const STRATEGY_TAGS = ['新人专享', '会员专享', '日常推荐', '活动专题', '季节限定'] as const
+
 const products: Product[] = [
   { id: 'prod-soy-kirin', spuId: 'CBD1001', name: '豆乳玉麒麟', category: '原味奶茶', price: 19, status: 'ACTIVE', salesRank: 2, launchRank: 11, accent: 'linear-gradient(135deg, #1c3b27 0%, #8dc191 100%)' },
   { id: 'prod-jasmine-milk', spuId: 'CBD1002', name: '茉莉奶绿', category: '奶绿', price: 17, status: 'ACTIVE', salesRank: 4, launchRank: 10, accent: 'linear-gradient(135deg, #365f35 0%, #a8d8a5 100%)' },
@@ -135,6 +137,8 @@ const strategies: Strategy[] = [
     manualProductIds: [],
     filterUnavailable: true,
     kind: 'SYSTEM',
+    tag: '日常推荐',
+    imageUrl: 'https://picsum.photos/seed/strategy-hot-all/100/100',
     salesDataSource: 'STORE',
   },
   {
@@ -152,6 +156,8 @@ const strategies: Strategy[] = [
     manualProductIds: [],
     filterUnavailable: true,
     kind: 'CUSTOM',
+    tag: '季节限定',
+    imageUrl: 'https://picsum.photos/seed/strategy-new-seasonal/100/100',
     salesDataSource: 'NATIONAL',
   },
   {
@@ -169,6 +175,8 @@ const strategies: Strategy[] = [
     manualProductIds: ['prod-coconut-latte', 'prod-oat-latte', 'prod-americano'],
     filterUnavailable: true,
     kind: 'CUSTOM',
+    tag: '活动专题',
+    imageUrl: 'https://picsum.photos/seed/strategy-manual-coffee/100/100',
     salesDataSource: 'NATIONAL',
   },
   {
@@ -186,6 +194,8 @@ const strategies: Strategy[] = [
     manualProductIds: [],
     filterUnavailable: true,
     kind: 'CUSTOM',
+    tag: '日常推荐',
+    imageUrl: 'https://picsum.photos/seed/strategy-hot-fruit/100/100',
     salesDataSource: 'NATIONAL',
   },
 ]

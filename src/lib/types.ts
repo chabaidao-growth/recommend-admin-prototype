@@ -57,6 +57,8 @@ export interface Strategy {
   manualProductIds: string[]
   filterUnavailable: boolean
   kind: 'SYSTEM' | 'CUSTOM'
+  tag: string
+  imageUrl: string
   manualBoostItems?: ManualBoostItem[]
   manualBoostEnabled?: boolean
 }

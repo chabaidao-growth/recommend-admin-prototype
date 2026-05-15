@@ -37,6 +37,7 @@ import {
   Tooltip,
   Typography,
   Radio,
+  Upload,
   message,
 } from 'antd'
 import {
@@ -63,6 +64,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getPoolProducts, productMap } from '../lib/domain'
 import { CURRENT_USER, useAdminStore } from '../lib/store'
+import { STRATEGY_TAGS } from '../lib/mockData'
 import type { Product, Strategy } from '../lib/types'
 
 const modeMeta: Record<Strategy['mode'], { title: string; desc: string; icon: React.ReactNode; tag: string; color?: string }> = {
@@ -216,6 +218,8 @@ interface StrategyFormValues {
   description: string
   poolId: string
   mode: Strategy['mode']
+  tag: string
+  imageUrl: string
   sortDimension?: 'SALES_COUNT' | 'SALES_AMOUNT'
   timeWindow?: '7D' | '14D' | '30D'
   salesDataSource?: 'NATIONAL' | 'STORE'
@@ -277,6 +281,8 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
       description: strategy.description || '',
       poolId: strategy.poolId,
       mode: strategy.mode,
+      tag: strategy.tag || '',
+      imageUrl: strategy.imageUrl || '',
       sortDimension: strategy.sortDimension,
       timeWindow: strategy.timeWindow,
       salesDataSource: strategy.salesDataSource,
@@ -387,6 +393,8 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
           description: values.description || '',
           poolId: values.poolId,
           mode: values.mode,
+          tag: values.tag || '',
+          imageUrl: values.imageUrl || '',
           sortDimension: values.sortDimension || 'SALES_COUNT',
           timeWindow: values.timeWindow || '7D',
           salesDataSource: values.salesDataSource || strategy.salesDataSource || 'STORE',
@@ -566,6 +574,18 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
                 <Input placeholder="请输入策略名称，1-30 字" />
               </Form.Item>
             </Col>
+            <Col span={12}>
+              <Form.Item
+                label="业务标签"
+                name="tag"
+                rules={[{ required: true, message: '请选择业务标签' }]}
+              >
+                <Select
+                  placeholder="请选择业务标签"
+                  options={STRATEGY_TAGS.map((t) => ({ label: t, value: t }))}
+                />
+              </Form.Item>
+            </Col>
             {mode !== 'MANUAL' && (
             <Col span={12}>
               <Form.Item
@@ -585,8 +605,51 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
             </Col>
             )}
           </Row>
-          <Row>
-            <Col span={24}>
+          <Row gutter={24}>
+            <Col span={12}>
+              <Form.Item
+                label="展示图片"
+                name="imageUrl"
+                rules={[{ required: true, message: '请上传展示图片' }]}
+              >
+                <Upload
+                  listType="picture-card"
+                  maxCount={1}
+                  fileList={(() => {
+                    const url = form.getFieldValue('imageUrl')
+                    return url ? [{ uid: '-1', name: 'image', status: 'done' as const, url }] : []
+                  })()}
+                  beforeUpload={(file) => {
+                    if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+                      message.error('仅支持 JPG/PNG/GIF 格式')
+                      return Upload.LIST_IGNORE
+                    }
+                    if (file.size > 100 * 1024) {
+                      message.error('图片大小不能超过 100KB')
+                      return Upload.LIST_IGNORE
+                    }
+                    return true
+                  }}
+                  customRequest={({ file, onSuccess }) => {
+                    const reader = new FileReader()
+                    reader.onload = () => {
+                      form.setFieldValue('imageUrl', reader.result as string)
+                      setTimeout(() => onSuccess?.('ok'), 0)
+                    }
+                    reader.readAsDataURL(file as File)
+                  }}
+                  onRemove={() => { form.setFieldValue('imageUrl', '') }}
+                >
+                  {form.getFieldValue('imageUrl') ? null : (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8, fontSize: 12 }}>上传</div>
+                    </div>
+                  )}
+                </Upload>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
               <Form.Item
                 label="描述"
                 name="description"

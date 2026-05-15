@@ -42,7 +42,7 @@ export const CURRENT_USER_ROLE: 'SUPER_ADMIN' | 'CUSTOM' = 'SUPER_ADMIN'
 
 const STORAGE_KEY = 'recommend-admin-store'
 const VERSION_KEY = 'recommend-admin-data-version'
-const DATA_VERSION = '20260515v1'
+const DATA_VERSION = '20260515v2'
 const AdminStoreContext = createContext<AdminStoreValue | null>(null)
 
 function replaceItem<T extends { id: string }>(items: T[], next: T) {
@@ -64,6 +64,7 @@ export function AdminStoreProvider({ children }: PropsWithChildren) {
         (parsed.strategies?.[0] && !('description' in parsed.strategies[0])) ||
         (parsed.pools?.[0] && !('productAddedTimes' in parsed.pools[0])) ||
         (parsed.strategies?.[0] && !('salesDataSource' in parsed.strategies[0])) ||
+        (parsed.strategies?.[0] && !('tag' in parsed.strategies[0])) ||
         !parsed.users ||
         !parsed.roles ||
         (parsed.users?.[0] && !('roleIds' in parsed.users[0])) ||
@@ -136,6 +137,8 @@ export function AdminStoreProvider({ children }: PropsWithChildren) {
         manualProductIds: [],
         filterUnavailable: true,
         kind: 'CUSTOM',
+        tag: '',
+        imageUrl: '',
       }
       setState((current) => ({ ...current, strategies: [...current.strategies, next] }))
       return id
