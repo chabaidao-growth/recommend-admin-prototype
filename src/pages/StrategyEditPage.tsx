@@ -63,7 +63,7 @@ import type { ManualBoostItem } from '../lib/types'
 import { useEffect, useState, useMemo } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getPoolProducts, productMap } from '../lib/domain'
-import { CURRENT_USER, useAdminStore } from '../lib/store'
+import { canEditEntity, useAdminStore } from '../lib/store'
 import { STRATEGY_TAGS } from '../lib/mockData'
 import type { Product, Strategy } from '../lib/types'
 
@@ -260,7 +260,7 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
   const location = useLocation()
   const { state, updateStrategy, deleteStrategy } = useAdminStore()
   const isSystem = strategy.kind === 'SYSTEM'
-  const isOwner = strategy.createdBy === CURRENT_USER
+  const isOwner = canEditEntity(strategy)
   const isNew = (location.state as { isNew?: boolean })?.isNew ?? false
   const isExistingStrategy = !isNew
   const [isEditing, setIsEditing] = useState(isNew)
@@ -549,8 +549,8 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
                     </>
                   ) : (
                     <>
-                      <Tooltip title="仅创建人可操作"><Button icon={<EditOutlined />} disabled>编辑</Button></Tooltip>
-                      <Tooltip title="仅创建人可操作"><Button disabled>{isActive ? '停用' : '启用'}</Button></Tooltip>
+                      <Tooltip title="无权限编辑（仅创建人或超管可编辑）"><Button icon={<EditOutlined />} disabled>编辑</Button></Tooltip>
+                      <Tooltip title="无权限编辑（仅创建人或超管可编辑）"><Button disabled>{isActive ? '停用' : '启用'}</Button></Tooltip>
                       {isActive ? (
                         <Tooltip title="请先停用后再删除">
                           <span>
@@ -558,7 +558,7 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
                           </span>
                         </Tooltip>
                       ) : (
-                        <Tooltip title="仅创建人可操作"><Button danger icon={<DeleteOutlined />} disabled>删除</Button></Tooltip>
+                        <Tooltip title="无权限编辑（仅创建人或超管可编辑）"><Button danger icon={<DeleteOutlined />} disabled>删除</Button></Tooltip>
                       )}
                     </>
                   )}

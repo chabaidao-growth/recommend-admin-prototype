@@ -40,7 +40,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { createId, estimateCombinationCoverage } from '../lib/domain'
-import { CURRENT_USER, useAdminStore } from '../lib/store'
+import { canEditEntity, useAdminStore } from '../lib/store'
 import type { Combination, CombinationSlot } from '../lib/types'
 
 const GROUP_COLORS = ['#1677ff', '#fa8c16', '#52c41a', '#722ed1', '#eb2f96', '#13c2c2']
@@ -51,7 +51,7 @@ export function CombinationEditPage() {
   const { state, updateCombination, deleteCombination } = useAdminStore()
   const combination = state.combinations.find((item) => item.id === id)
   const [draft, setDraft] = useState<Combination | null>(combination ?? null)
-  const isOwner = combination?.createdBy === CURRENT_USER
+  const isOwner = combination ? canEditEntity(combination) : false
   const [isEditing, setIsEditing] = useState(false)
   const readonly = !isEditing
   const location = useLocation()

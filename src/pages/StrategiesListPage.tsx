@@ -5,12 +5,12 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
-import { Avatar, Button, Dropdown, Empty, Input, Modal, Popover, Row, Select, Space, Table, Tag, Typography } from 'antd'
+import { Avatar, Button, Dropdown, Empty, Input, Modal, Popover, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDate, getStrategyReferences, poolMap } from '../lib/domain'
-import { CURRENT_USER, useAdminStore } from '../lib/store'
+import { canEditEntity, useAdminStore } from '../lib/store'
 import type { Strategy } from '../lib/types'
 
 const modeTag: Record<Strategy['mode'], { color: string; label: string }> = {
@@ -178,7 +178,7 @@ export function StrategiesListPage() {
       width: 200,
       render: (_, record) => {
         const isSystem = record.kind === 'SYSTEM'
-        const canOperate = record.createdBy === CURRENT_USER
+        const canOperate = canEditEntity(record)
         const isActive = record.status === 'ACTIVE'
         const hasRefs = record.references.length > 0
 
@@ -193,14 +193,22 @@ export function StrategiesListPage() {
               查看
             </Button>
             {!isSystem && (
-              <Button
-                type="link"
-                size="small"
-                style={{ padding: 0 }}
-                onClick={() => handleToggleStatus(record.id)}
-              >
-                {isActive ? '停用' : '启用'}
-              </Button>
+              canOperate ? (
+                <Button
+                  type="link"
+                  size="small"
+                  style={{ padding: 0 }}
+                  onClick={() => handleToggleStatus(record.id)}
+                >
+                  {isActive ? '停用' : '启用'}
+                </Button>
+              ) : (
+                <Tooltip title="无权限编辑（仅创建人或超管可编辑）">
+                  <Button type="link" size="small" style={{ padding: 0 }} disabled>
+                    {isActive ? '停用' : '启用'}
+                  </Button>
+                </Tooltip>
+              )
             )}
             {!isSystem && (
               <Dropdown

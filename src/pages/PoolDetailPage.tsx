@@ -34,7 +34,7 @@ import {
   SearchOutlined,
 } from '@ant-design/icons'
 import { formatDate, getPoolReferences, productMap } from '../lib/domain'
-import { CURRENT_USER, useAdminStore } from '../lib/store'
+import { canEditEntity, useAdminStore } from '../lib/store'
 import type { Product } from '../lib/types'
 import { isBeverage } from '../lib/types'
 
@@ -78,7 +78,7 @@ export function PoolDetailPage() {
   }
 
   const isSystem = pool.kind === 'SYSTEM'
-  const isOwner = pool.createdBy === CURRENT_USER
+  const isOwner = canEditEntity(pool)
   const canEditProducts = isOwner && !isSystem
   const references = getPoolReferences(state, pool.id)
 
@@ -273,7 +273,7 @@ export function PoolDetailPage() {
               {isOwner ? (
                 <Button icon={<EditOutlined />} onClick={startEditInfo}>编辑基础信息</Button>
               ) : (
-                <Tooltip title="仅创建人可编辑">
+                <Tooltip title="无权限编辑（仅创建人或超管可编辑）">
                   <Button icon={<EditOutlined />} disabled>编辑基础信息</Button>
                 </Tooltip>
               )}
@@ -301,7 +301,7 @@ export function PoolDetailPage() {
                   {pool.status === 'ACTIVE' ? '停用' : '启用'}
                 </Button>
               ) : (
-                <Tooltip title="仅创建人可操作">
+                <Tooltip title="无权限编辑（仅创建人或超管可编辑）">
                   <Button disabled>
                     {pool.status === 'ACTIVE' ? '停用' : '启用'}
                   </Button>
@@ -372,7 +372,7 @@ export function PoolDetailPage() {
                   </Button>
                 )
               ) : (
-                <Tooltip title={pool.status === 'ACTIVE' ? '请先停用后再删除' : '仅创建人可操作'}>
+                <Tooltip title={pool.status === 'ACTIVE' ? '请先停用后再删除' : '无权限编辑（仅创建人或超管可编辑）'}>
                   <Button danger icon={<DeleteOutlined />} disabled>
                     删除
                   </Button>

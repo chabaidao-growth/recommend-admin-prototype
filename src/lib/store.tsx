@@ -40,6 +40,14 @@ interface AdminStoreValue {
 export const CURRENT_USER = '陈悦'
 export const CURRENT_USER_ROLE: 'SUPER_ADMIN' | 'CUSTOM' = 'SUPER_ADMIN'
 
+export function isSuperAdmin(): boolean {
+  return CURRENT_USER_ROLE === 'SUPER_ADMIN'
+}
+
+export function canEditEntity(entity: { createdBy: string }): boolean {
+  return entity.createdBy === CURRENT_USER || isSuperAdmin()
+}
+
 const STORAGE_KEY = 'recommend-admin-store'
 const VERSION_KEY = 'recommend-admin-data-version'
 const DATA_VERSION = '20260515v2'

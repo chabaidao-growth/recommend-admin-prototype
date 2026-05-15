@@ -5,7 +5,7 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
-import { Button, Dropdown, Empty, Input, Modal, Row, Select, Space, Table, Tag, Typography } from 'antd'
+import { Button, Dropdown, Empty, Input, Modal, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -15,7 +15,7 @@ import {
   getPoolProducts,
   strategyMap,
 } from '../lib/domain'
-import { useAdminStore } from '../lib/store'
+import { canEditEntity, useAdminStore } from '../lib/store'
 import type { Combination } from '../lib/types'
 
 function deriveBusinessUnit(
@@ -49,6 +49,7 @@ interface CombinationRow {
   coverage: number
   createdAt: string
   businessUnit: string
+  createdBy: string
 }
 
 export function CombinationsListPage() {
@@ -94,6 +95,7 @@ export function CombinationsListPage() {
       coverage,
       createdAt: combination.createdAt,
       businessUnit,
+      createdBy: combination.createdBy,
     }))
   }, [filteredCombinations])
 
@@ -169,7 +171,10 @@ export function CombinationsListPage() {
       title: '操作',
       key: 'action',
       width: 200,
-      render: (_, record) => (
+      render: (_, record) => {
+        const canOperate = canEditEntity(record)
+        const isActive = record.status === 'ACTIVE'
+        return (
           <Space>
             <Button
               type="link"
@@ -179,14 +184,22 @@ export function CombinationsListPage() {
             >
               查看
             </Button>
-            <Button
-              type="link"
-              size="small"
-              style={{ padding: 0 }}
-              onClick={() => handleToggleStatus(record)}
-            >
-              {record.status === 'ACTIVE' ? '停用' : '启用'}
-            </Button>
+            {canOperate ? (
+              <Button
+                type="link"
+                size="small"
+                style={{ padding: 0 }}
+                onClick={() => handleToggleStatus(record)}
+              >
+                {record.status === 'ACTIVE' ? '停用' : '启用'}
+              </Button>
+            ) : (
+              <Tooltip title="无权限编辑（仅创建人或超管可编辑）">
+                <Button type="link" size="small" style={{ padding: 0 }} disabled>
+                  {record.status === 'ACTIVE' ? '停用' : '启用'}
+                </Button>
+              </Tooltip>
+            )}
             <Dropdown
               menu={{
                 items: [
@@ -200,7 +213,7 @@ export function CombinationsListPage() {
                     key: 'delete',
                     label: <span style={{ color: 'var(--ant-color-error)' }}>删除</span>,
                     icon: <DeleteOutlined style={{ color: 'var(--ant-color-error)' }} />,
-                    disabled: record.status === 'ACTIVE',
+                    disabled: isActive || !canOperate,
                     onClick: () => handleDelete(record),
                   },
                 ],
@@ -210,7 +223,8 @@ export function CombinationsListPage() {
               <Button type="text" size="small" icon={<MoreOutlined />} />
             </Dropdown>
           </Space>
-        )
+        );
+      },
     },
   ]
 
