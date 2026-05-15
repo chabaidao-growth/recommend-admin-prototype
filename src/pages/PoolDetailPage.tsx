@@ -54,6 +54,7 @@ export function PoolDetailPage() {
   const [importText, setImportText] = useState('')
   const [addDrawerOpen, setAddDrawerOpen] = useState(false)
   const [addSearchQuery, setAddSearchQuery] = useState('')
+  const [selectedAddKeys, setSelectedAddKeys] = useState<React.Key[]>([])
 
   // 基础信息编辑态
   const [editingInfo, setEditingInfo] = useState(false)
@@ -560,10 +561,27 @@ export function PoolDetailPage() {
         onClose={() => {
           setAddDrawerOpen(false)
           setAddSearchQuery('')
+          setSelectedAddKeys([])
         }}
-        width={520}
+        width={560}
+        footer={
+          <Flex justify="space-between" align="center">
+            <Text type="secondary">已选 {selectedAddKeys.length} 件</Text>
+            <Button
+              type="primary"
+              disabled={selectedAddKeys.length === 0}
+              onClick={() => {
+                handleAddProducts(selectedAddKeys as string[])
+                setSelectedAddKeys([])
+                setAddDrawerOpen(false)
+              }}
+            >
+              批量添加（{selectedAddKeys.length}）
+            </Button>
+          </Flex>
+        }
       >
-        <Flex vertical gap={16}>
+        <Flex vertical gap={12}>
           <Input
             placeholder="搜索商品名 / 品类"
             prefix={<SearchOutlined />}
@@ -571,39 +589,50 @@ export function PoolDetailPage() {
             onChange={(e) => setAddSearchQuery(e.target.value)}
             allowClear
           />
-          <List
-            size="small"
-            dataSource={availableProducts}
-            renderItem={(product) => (
-              <List.Item
-                actions={[
-                  <Button
-                    type="primary"
-                    size="small"
-                    onClick={() => {
-                      handleAddProducts([product.id])
-                    }}
-                  >
-                    添加
-                  </Button>,
-                ]}
+          <Flex justify="end">
+            <Tooltip title="仅快照当前结果，不订阅后续新品">
+              <Button
+                size="small"
+                onClick={() => setSelectedAddKeys(availableProducts.map((p) => p.id))}
+                disabled={availableProducts.length === 0}
               >
-                <List.Item.Meta
-                  avatar={
-                    <Avatar
-                      size={36}
-                      shape="square"
-                      style={{ background: product.accent, color: '#fff', fontSize: 11, fontWeight: 600 }}
-                    >
-                      {product.name.slice(0, 2)}
+                全选当前结果
+              </Button>
+            </Tooltip>
+          </Flex>
+          <Table
+            rowKey="id"
+            rowSelection={{
+              type: 'checkbox',
+              selectedRowKeys: selectedAddKeys,
+              onChange: (keys) => setSelectedAddKeys(keys),
+            }}
+            columns={[
+              {
+                title: '商品名称',
+                dataIndex: 'name',
+                key: 'name',
+                render: (name: string, record) => (
+                  <Space>
+                    <Avatar size={28} shape="square" style={{ background: record.accent, color: '#fff', fontSize: 10, fontWeight: 600 }}>
+                      {name.slice(0, 1)}
                     </Avatar>
-                  }
-                  title={product.name}
-                  description={product.category}
-                />
-              </List.Item>
-            )}
+                    <Text>{name}</Text>
+                  </Space>
+                ),
+              },
+              {
+                title: '品类',
+                dataIndex: 'category',
+                key: 'category',
+                width: 100,
+              },
+            ]}
+            dataSource={availableProducts}
+            pagination={false}
+            size="small"
             locale={{ emptyText: '没有可添加的商品' }}
+            scroll={{ y: 400 }}
           />
         </Flex>
       </Drawer>
