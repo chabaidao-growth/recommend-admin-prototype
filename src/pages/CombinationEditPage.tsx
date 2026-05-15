@@ -451,10 +451,16 @@ function SlotCard({
               allowClear
               disabled={readonly}
               style={{ width: '100%' }}
-              options={state.strategies.map((item) => ({
-                value: item.id,
-                label: `${item.name} · ${item.mode}`,
-              }))}
+              options={state.strategies
+                .filter((item) => item.status === 'ACTIVE' || item.id === slot.strategyId)
+                .map((item) => ({
+                  value: item.id,
+                  label: item.status === 'INACTIVE'
+                    ? `${item.name} · ${item.mode}（已停用）`
+                    : `${item.name} · ${item.mode}`,
+                  disabled: item.status === 'INACTIVE',
+                  style: item.status === 'INACTIVE' ? { color: 'var(--ant-color-text-tertiary)' } : undefined,
+                }))}
             />
             {pool && (
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
