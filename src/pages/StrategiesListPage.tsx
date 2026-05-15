@@ -5,7 +5,7 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
-import { Avatar, Button, Dropdown, Empty, Input, Modal, Popover, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd'
+import { Button, Dropdown, Empty, Input, Modal, Popover, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -91,21 +91,6 @@ export function StrategiesListPage() {
       render: (mode: Strategy['mode']) => (
         <Tag color={modeTag[mode].color}>{modeTag[mode].label}</Tag>
       ),
-    },
-    {
-      title: '标签',
-      dataIndex: 'tag',
-      key: 'tag',
-      width: 100,
-      render: (tag: string) => tag ? <Tag>{tag}</Tag> : <Typography.Text type="secondary">—</Typography.Text>,
-    },
-    {
-      title: '图片',
-      key: 'imageUrl',
-      width: 80,
-      render: (_, record) => record.imageUrl
-        ? <Avatar shape="square" size={40} src={record.imageUrl} />
-        : <Typography.Text type="secondary">—</Typography.Text>,
     },
     {
       title: '状态',

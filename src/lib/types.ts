@@ -41,6 +41,11 @@ export interface Pool {
   kind: 'SYSTEM' | 'CUSTOM'
 }
 
+export interface ThumbnailSlot {
+  order: 1 | 2 | 3
+  url: string
+}
+
 export interface Strategy {
   id: string
   name: string
@@ -57,8 +62,7 @@ export interface Strategy {
   manualProductIds: string[]
   filterUnavailable: boolean
   kind: 'SYSTEM' | 'CUSTOM'
-  tag: string
-  imageUrl: string
+  thumbnails: ThumbnailSlot[]
   manualBoostItems?: ManualBoostItem[]
   manualBoostEnabled?: boolean
 }

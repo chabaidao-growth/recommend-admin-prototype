@@ -57,6 +57,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { ColumnsType } from 'antd/es/table'
+import type { FormInstance } from 'antd'
 import dayjs from 'dayjs'
 import { createId } from '../lib/domain'
 import type { ManualBoostItem } from '../lib/types'
@@ -64,8 +65,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getPoolProducts, productMap } from '../lib/domain'
 import { canEditEntity, useAdminStore } from '../lib/store'
-import { STRATEGY_TAGS } from '../lib/mockData'
-import type { Product, Strategy } from '../lib/types'
+import type { Product, Strategy, ThumbnailSlot } from '../lib/types'
 
 const modeMeta: Record<Strategy['mode'], { title: string; desc: string; icon: React.ReactNode; tag: string; color?: string }> = {
   HOT: {
@@ -218,8 +218,7 @@ interface StrategyFormValues {
   description: string
   poolId: string
   mode: Strategy['mode']
-  tag: string
-  imageUrl: string
+  thumbnails: ThumbnailSlot[]
   sortDimension?: 'SALES_COUNT' | 'SALES_AMOUNT'
   timeWindow?: '7D' | '14D' | '30D'
   salesDataSource?: 'NATIONAL' | 'STORE'
@@ -281,8 +280,7 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
       description: strategy.description || '',
       poolId: strategy.poolId,
       mode: strategy.mode,
-      tag: strategy.tag || '',
-      imageUrl: strategy.imageUrl || '',
+      thumbnails: strategy.thumbnails || [],
       sortDimension: strategy.sortDimension,
       timeWindow: strategy.timeWindow,
       salesDataSource: strategy.salesDataSource,
@@ -393,8 +391,7 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
           description: values.description || '',
           poolId: values.poolId,
           mode: values.mode,
-          tag: values.tag || '',
-          imageUrl: values.imageUrl || '',
+          thumbnails: values.thumbnails || [],
           sortDimension: values.sortDimension || 'SALES_COUNT',
           timeWindow: values.timeWindow || '7D',
           salesDataSource: values.salesDataSource || strategy.salesDataSource || 'STORE',
@@ -592,81 +589,6 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
             </Col>
             <Col span={12}>
               <Form.Item
-                label="业务标签"
-                name="tag"
-                rules={[{ required: true, message: '请选择业务标签' }]}
-              >
-                <Select
-                  placeholder="请选择业务标签"
-                  options={STRATEGY_TAGS.map((t) => ({ label: t, value: t }))}
-                />
-              </Form.Item>
-            </Col>
-            {mode !== 'MANUAL' && (
-            <Col span={12}>
-              <Form.Item
-                label="选择选品池"
-                name="poolId"
-                rules={[{ required: true, message: '请选择选品池' }]}
-              >
-                <Select
-                  placeholder="请选择选品池"
-                  onChange={setSelectedPoolId}
-                  options={state.pools.map((pool) => ({
-                    label: `${pool.name} · ${pool.productIds.length} 件商品`,
-                    value: pool.id,
-                  }))}
-                />
-              </Form.Item>
-            </Col>
-            )}
-          </Row>
-          <Row gutter={24}>
-            <Col span={12}>
-              <Form.Item
-                label="展示图片"
-                name="imageUrl"
-                rules={[{ required: true, message: '请上传展示图片' }]}
-              >
-                <Upload
-                  listType="picture-card"
-                  maxCount={1}
-                  fileList={(() => {
-                    const url = form.getFieldValue('imageUrl')
-                    return url ? [{ uid: '-1', name: 'image', status: 'done' as const, url }] : []
-                  })()}
-                  beforeUpload={(file) => {
-                    if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
-                      message.error('仅支持 JPG/PNG/GIF 格式')
-                      return Upload.LIST_IGNORE
-                    }
-                    if (file.size > 100 * 1024) {
-                      message.error('图片大小不能超过 100KB')
-                      return Upload.LIST_IGNORE
-                    }
-                    return true
-                  }}
-                  customRequest={({ file, onSuccess }) => {
-                    const reader = new FileReader()
-                    reader.onload = () => {
-                      form.setFieldValue('imageUrl', reader.result as string)
-                      setTimeout(() => onSuccess?.('ok'), 0)
-                    }
-                    reader.readAsDataURL(file as File)
-                  }}
-                  onRemove={() => { form.setFieldValue('imageUrl', '') }}
-                >
-                  {form.getFieldValue('imageUrl') ? null : (
-                    <div>
-                      <PlusOutlined />
-                      <div style={{ marginTop: 8, fontSize: 12 }}>上传</div>
-                    </div>
-                  )}
-                </Upload>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
                 label="描述"
                 name="description"
                 rules={[{ max: 200, message: '描述最多 200 字' }]}
@@ -773,6 +695,28 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
                 )
               })}
             </Radio.Group>
+          </Form.Item>
+
+          {/* 选品池（MANUAL 模式不显示） */}
+          <Form.Item noStyle shouldUpdate>
+            {() =>
+              mode !== 'MANUAL' && (
+                <Form.Item
+                  label="选择选品池"
+                  name="poolId"
+                  rules={[{ required: true, message: '请选择选品池' }]}
+                >
+                  <Select
+                    placeholder="请选择选品池"
+                    onChange={setSelectedPoolId}
+                    options={state.pools.map((pool) => ({
+                      label: `${pool.name} · ${pool.productIds.length} 件商品`,
+                      value: pool.id,
+                    }))}
+                  />
+                </Form.Item>
+              )
+            }
           </Form.Item>
 
           {/* HOT 模式参数 */}
@@ -961,6 +905,21 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
               )
             }
           </Form.Item>
+
+          {/* 缩略图标签 */}
+          <div style={{ marginTop: 24 }}>
+            <Typography.Text style={{ fontSize: 13, color: 'var(--ant-color-text-secondary)', display: 'block', marginBottom: 12 }}>
+              缩略图标签
+            </Typography.Text>
+            <Flex gap={16}>
+              {[1, 2, 3].map((order) => (
+                <ThumbnailUploadSlot key={order} order={order as 1 | 2 | 3} form={form} readonly={readonly} />
+              ))}
+            </Flex>
+            <Typography.Text type="secondary" style={{ fontSize: 12, marginTop: 8, display: 'block' }}>
+              156*54, 小于100KB 支持 jpg, jpeg, gif, png, JPG, GIF, PNG 格式
+            </Typography.Text>
+          </div>
         </Card>
 
         {/* 人工加权模块（MANUAL 模式不支持加权） */}
@@ -1139,5 +1098,88 @@ function ManualSortRow({
         )}
       </Space>
     </div>
+  )
+}
+
+function ThumbnailUploadSlot({
+  order,
+  form,
+  readonly,
+}: {
+  order: 1 | 2 | 3
+  form: FormInstance
+  readonly: boolean
+}) {
+  const thumbnails: ThumbnailSlot[] = form.getFieldValue('thumbnails') || []
+  const slot = thumbnails.find((t) => t.order === order)
+
+  function handleUpload(file: File) {
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/gif'].includes(file.type)) {
+      message.error('仅支持 JPG/JPEG/PNG/GIF 格式')
+      return Upload.LIST_IGNORE
+    }
+    if (file.size > 100 * 1024) {
+      message.error('图片大小不能超过 100KB')
+      return Upload.LIST_IGNORE
+    }
+    const reader = new FileReader()
+    reader.onload = () => {
+      const next = [...thumbnails.filter((t) => t.order !== order), { order, url: reader.result as string }]
+        .sort((a, b) => a.order - b.order)
+      form.setFieldValue('thumbnails', next)
+    }
+    reader.readAsDataURL(file)
+    return Upload.LIST_IGNORE
+  }
+
+  function handleRemove() {
+    form.setFieldValue('thumbnails', thumbnails.filter((t) => t.order !== order))
+  }
+
+  return (
+    <Flex vertical align="center" gap={4}>
+      <Tag color="blue">第 {order} 顺位</Tag>
+      {slot ? (
+        <div style={{ position: 'relative', width: 156, height: 54 }}>
+          <img
+            src={slot.url}
+            alt={`顺位 ${order}`}
+            style={{ width: 156, height: 54, objectFit: 'cover', borderRadius: 4, border: '1px solid var(--ant-color-border)' }}
+          />
+          {!readonly && (
+            <Button
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={handleRemove}
+              style={{ position: 'absolute', top: 2, right: 2, padding: 0, minWidth: 22, height: 22 }}
+            />
+          )}
+        </div>
+      ) : (
+        <Upload
+          showUploadList={false}
+          beforeUpload={handleUpload}
+          disabled={readonly}
+        >
+          <div
+            style={{
+              width: 156,
+              height: 54,
+              border: '1px dashed var(--ant-color-border)',
+              borderRadius: 4,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: readonly ? 'default' : 'pointer',
+              color: 'var(--ant-color-text-quaternary)',
+              fontSize: 20,
+            }}
+          >
+            <PlusOutlined />
+          </div>
+        </Upload>
+      )}
+    </Flex>
   )
 }
