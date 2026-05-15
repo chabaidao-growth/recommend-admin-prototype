@@ -1110,7 +1110,7 @@ function ThumbnailUploadSlot({
   form: FormInstance
   readonly: boolean
 }) {
-  const thumbnails: ThumbnailSlot[] = form.getFieldValue('thumbnails') || []
+  const thumbnails: ThumbnailSlot[] = Form.useWatch('thumbnails', form) || []
   const slot = thumbnails.find((t) => t.order === order)
 
   function handleUpload(file: File) {
