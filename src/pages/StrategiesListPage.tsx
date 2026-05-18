@@ -5,7 +5,7 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
-import { Button, Dropdown, Empty, Input, Modal, Popover, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd'
+import { Button, Dropdown, Empty, Input, message, Modal, Popover, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -39,6 +39,7 @@ export function StrategiesListPage() {
         key: strategy.id,
         references: getStrategyReferences(state, strategy.id),
         poolName: pools[strategy.poolId]?.name ?? '-',
+        poolExists: !!pools[strategy.poolId],
       }))
     // 系统策略置顶
     return filtered.sort((a, b) => {
@@ -51,7 +52,31 @@ export function StrategiesListPage() {
   function handleToggleStatus(id: string) {
     const s = state.strategies.find((item) => item.id === id)
     if (!s) return
-    updateStrategy(id, { ...s, status: s.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' })
+    const next = s.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+    if (next === 'INACTIVE') {
+      const activeCombos = state.combinations.filter(
+        (c) => c.slots.some((slot) => slot.strategyId === s.id) && c.status === 'ACTIVE',
+      )
+      if (activeCombos.length > 0) {
+        Modal.warning({
+          title: '无法停用',
+          content: `以下策略组合仍在启用中，请先停用后再停用策略：${activeCombos.map((c) => c.name).join('、')}`,
+        })
+        return
+      }
+    }
+    if (next === 'ACTIVE') {
+      const pool = state.pools.find((p) => p.id === s.poolId)
+      if (!pool) {
+        message.error('关联的选品池已删除，无法启用')
+        return
+      }
+      if (pool.status !== 'ACTIVE') {
+        message.error(`关联的选品池「${pool.name}」已停用，请先启用选品池`)
+        return
+      }
+    }
+    updateStrategy(id, { ...s, status: next })
   }
 
   function handleCopyAndNavigate(id: string) {
@@ -105,10 +130,15 @@ export function StrategiesListPage() {
     {
       title: '引用选品池',
       key: 'pool',
-      render: (_, record) => (
+      render: (_, record) => record.poolExists ? (
         <Button type="link" size="small" style={{ padding: 0 }} onClick={() => navigate(`/pools/${record.poolId}`)}>
           {record.poolName}
         </Button>
+      ) : (
+        <Space>
+          <Typography.Text type="secondary">{record.poolName}</Typography.Text>
+          <Tag color="error">关联的选品池已删除</Tag>
+        </Space>
       ),
     },
     {
@@ -165,7 +195,6 @@ export function StrategiesListPage() {
         const isSystem = record.kind === 'SYSTEM'
         const canOperate = canEditEntity(record)
         const isActive = record.status === 'ACTIVE'
-        const hasRefs = record.references.length > 0
 
         return (
           <Space>
@@ -209,7 +238,7 @@ export function StrategiesListPage() {
                       key: 'delete',
                       label: <span style={{ color: 'var(--ant-color-error)' }}>删除</span>,
                       icon: <DeleteOutlined style={{ color: 'var(--ant-color-error)' }} />,
-                      disabled: !canOperate || hasRefs || isActive,
+                      disabled: !canOperate || isActive,
                       onClick: () => handleDelete(record),
                     },
                   ],
@@ -280,7 +309,7 @@ export function StrategiesListPage() {
           icon={<PlusOutlined />}
           onClick={() => {
             const id = createStrategy()
-            navigate(`/strategies/${id}/edit`, { state: { isNew: true } })
+            navigate(`/strategies/${id}/edit?new`)
           }}
         >
           新建策略

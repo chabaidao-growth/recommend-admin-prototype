@@ -34,6 +34,7 @@ import {
   Switch,
   Table,
   Tag,
+  theme,
   Tooltip,
   Typography,
   Radio,
@@ -62,7 +63,7 @@ import dayjs from 'dayjs'
 import { createId } from '../lib/domain'
 import type { ManualBoostItem } from '../lib/types'
 import { useEffect, useState, useMemo } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { getPoolProducts, productMap } from '../lib/domain'
 import { canEditEntity, useAdminStore } from '../lib/store'
 import type { Product, Strategy, ThumbnailSlot } from '../lib/types'
@@ -100,6 +101,7 @@ const modeMeta: Record<Strategy['mode'], { title: string; desc: string; icon: Re
 const sortDimensionOptions = [
   { label: '销量（杯数）', value: 'SALES_COUNT' },
   { label: '销售额（金额）', value: 'SALES_AMOUNT' },
+  { label: '复购率', value: 'REPURCHASE_RATE' },
 ]
 
 const salesDataSourceOptions = [
@@ -113,7 +115,7 @@ const timeWindowOptions = [
   { label: '近 30 天', value: '30D' },
 ]
 
-function boostColumnsFor(state: ReturnType<typeof useAdminStore>['state'], readonly: boolean, onUpdate: (id: string, patch: Partial<ManualBoostItem>) => void, onRemove: (id: string) => void): ColumnsType<ManualBoostItem> {
+function boostColumnsFor(state: ReturnType<typeof useAdminStore>['state'], readonly: boolean, onUpdate: (id: string, patch: Partial<ManualBoostItem>) => void, onRemove: (id: string) => void, selectedProductIds: string[]): ColumnsType<ManualBoostItem> {
   return [
     {
       title: '商品',
@@ -130,6 +132,7 @@ function boostColumnsFor(state: ReturnType<typeof useAdminStore>['state'], reado
           options={state.products.map((p) => ({
             label: `${p.name}（${p.category}）`,
             value: p.id,
+            disabled: p.id !== productId && selectedProductIds.includes(p.id),
           }))}
           style={{ width: '100%' }}
           filterOption={(input, option) =>
@@ -219,7 +222,7 @@ interface StrategyFormValues {
   poolId: string
   mode: Strategy['mode']
   thumbnails: ThumbnailSlot[]
-  sortDimension?: 'SALES_COUNT' | 'SALES_AMOUNT'
+  sortDimension?: 'SALES_COUNT' | 'SALES_AMOUNT' | 'REPURCHASE_RATE'
   timeWindow?: '7D' | '14D' | '30D'
   salesDataSource?: 'NATIONAL' | 'STORE'
   fallbackDataSource?: 'NATIONAL' | 'STORE'
@@ -256,11 +259,12 @@ function StrategyNotFound() {
 
 function StrategyEditor({ strategy }: { strategy: Strategy }) {
   const navigate = useNavigate()
-  const location = useLocation()
   const { state, updateStrategy, deleteStrategy } = useAdminStore()
+  const { token } = theme.useToken()
   const isSystem = strategy.kind === 'SYSTEM'
   const isOwner = canEditEntity(strategy)
-  const isNew = (location.state as { isNew?: boolean })?.isNew ?? false
+  const [searchParams] = useSearchParams()
+  const isNew = searchParams.has('new')
   const isExistingStrategy = !isNew
   const [isEditing, setIsEditing] = useState(isNew)
 
@@ -379,7 +383,7 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
     setManualBoostItems((prev) => prev.filter((item) => item.id !== id))
   }
 
-  const boostColumns = boostColumnsFor(state, readonly, handleUpdateBoostItem, handleRemoveBoostItem)
+  const boostColumns = boostColumnsFor(state, readonly, handleUpdateBoostItem, handleRemoveBoostItem, manualBoostItems.map((i) => i.productId).filter(Boolean))
 
   function handleSave() {
     form
@@ -425,9 +429,33 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
 
   function handleToggleStatus() {
     if (!strategy) return
+    const next = strategy.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+    if (next === 'INACTIVE') {
+      const activeCombos = state.combinations.filter(
+        (c) => c.slots.some((slot) => slot.strategyId === strategy.id) && c.status === 'ACTIVE',
+      )
+      if (activeCombos.length > 0) {
+        Modal.warning({
+          title: '无法停用',
+          content: `以下策略组合仍在启用中，请先停用后再停用策略：${activeCombos.map((c) => c.name).join('、')}`,
+        })
+        return
+      }
+    }
+    if (next === 'ACTIVE') {
+      const pool = state.pools.find((p) => p.id === strategy.poolId)
+      if (!pool) {
+        message.error('关联的选品池已删除，无法启用')
+        return
+      }
+      if (pool.status !== 'ACTIVE') {
+        message.error(`关联的选品池「${pool.name}」已停用，请先启用选品池`)
+        return
+      }
+    }
     updateStrategy(strategy.id, {
       ...strategy!,
-      status: strategy.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE',
+      status: next,
     })
   }
 
@@ -699,24 +727,39 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
 
           {/* 选品池（MANUAL 模式不显示） */}
           <Form.Item noStyle shouldUpdate>
-            {() =>
-              mode !== 'MANUAL' && (
+            {() => {
+              if (mode === 'MANUAL') return null
+              const currentPoolId = form.getFieldValue('poolId')
+              const poolExists = currentPoolId && state.pools.some((p) => p.id === currentPoolId)
+              return (
                 <Form.Item
                   label="选择选品池"
                   name="poolId"
                   rules={[{ required: true, message: '请选择选品池' }]}
                 >
-                  <Select
-                    placeholder="请选择选品池"
-                    onChange={setSelectedPoolId}
-                    options={state.pools.map((pool) => ({
-                      label: `${pool.name} · ${pool.productIds.length} 件商品`,
-                      value: pool.id,
-                    }))}
-                  />
+                  <Flex gap={8}>
+                    <Select
+                      placeholder="请选择选品池"
+                      onChange={setSelectedPoolId}
+                      style={{ flex: 1 }}
+                      options={state.pools.map((pool) => ({
+                        label: `${pool.name} · ${pool.productIds.length} 件商品`,
+                        value: pool.id,
+                      }))}
+                    />
+                    {currentPoolId && !poolExists && <Tag color="error">关联的选品池已删除</Tag>}
+                  </Flex>
                 </Form.Item>
               )
-            }
+            }}
+          </Form.Item>
+          <Form.Item noStyle shouldUpdate>
+            {() => {
+              if (mode === 'MANUAL') return null
+              const currentPoolId = form.getFieldValue('poolId')
+              if (!currentPoolId || state.pools.some((p) => p.id === currentPoolId)) return null
+              return <Alert type="warning" showIcon style={{ marginTop: 8 }} message="关联的选品池已删除，请重新选择选品池" />
+            }}
           </Form.Item>
 
           {/* HOT 模式参数 */}
@@ -728,7 +771,7 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
                     strong
                     style={{
                       fontSize: 13,
-                      color: 'var(--ant-color-text-secondary)',
+                      color: token.colorTextSecondary,
                       marginBottom: 12,
                       display: 'block',
                     }}
@@ -900,7 +943,7 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
                   showIcon
                   style={{ marginTop: 16 }}
                   message="个性化推荐模式"
-                  description="系统将基于用户历史消费行为、偏好画像，结合 CTR（点击率）和 CVR（购买率）预估模型进行综合排序，无需额外配置参数。"
+                  description="系统将基于用户历史行为数据和偏好画像进行个性化综合排序，无需额外配置参数。"
                 />
               )
             }
@@ -908,14 +951,10 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
 
           {/* 缩略图标签 */}
           <div style={{ marginTop: 24 }}>
-            <Typography.Text style={{ fontSize: 13, color: 'var(--ant-color-text-secondary)', display: 'block', marginBottom: 12 }}>
+            <Typography.Text style={{ fontSize: 13, color: token.colorTextSecondary, display: 'block', marginBottom: 12 }}>
               缩略图标签
             </Typography.Text>
-            <Flex gap={16}>
-              {[1, 2, 3].map((order) => (
-                <ThumbnailUploadSlot key={order} order={order as 1 | 2 | 3} form={form} readonly={readonly} />
-              ))}
-            </Flex>
+            <ThumbnailUploadSlot form={form} readonly={readonly} />
             <Typography.Text type="secondary" style={{ fontSize: 12, marginTop: 8, display: 'block' }}>
               156*54, 小于100KB 支持 jpg, jpeg, gif, png, JPG, GIF, PNG 格式
             </Typography.Text>
@@ -1031,6 +1070,7 @@ function ManualSortRow({
   onRemove: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: product.id })
+  const { token } = theme.useToken()
 
   const style: React.CSSProperties = {
     opacity: isDragging ? 0.5 : 1,
@@ -1046,7 +1086,7 @@ function ManualSortRow({
           <span
             {...attributes}
             {...listeners}
-            style={{ cursor: 'grab', color: 'var(--ant-color-text-quaternary)' }}
+            style={{ cursor: 'grab', color: token.colorTextQuaternary }}
           >
             <HolderOutlined />
           </span>
@@ -1102,16 +1142,15 @@ function ManualSortRow({
 }
 
 function ThumbnailUploadSlot({
-  order,
   form,
   readonly,
 }: {
-  order: 1 | 2 | 3
   form: FormInstance
   readonly: boolean
 }) {
+  const { token } = theme.useToken()
   const thumbnails: ThumbnailSlot[] = Form.useWatch('thumbnails', form) || []
-  const slot = thumbnails.find((t) => t.order === order)
+  const slot = thumbnails[0]
 
   function handleUpload(file: File) {
     if (!['image/jpeg', 'image/jpg', 'image/png', 'image/gif'].includes(file.type)) {
@@ -1124,27 +1163,24 @@ function ThumbnailUploadSlot({
     }
     const reader = new FileReader()
     reader.onload = () => {
-      const next = [...thumbnails.filter((t) => t.order !== order), { order, url: reader.result as string }]
-        .sort((a, b) => a.order - b.order)
-      form.setFieldValue('thumbnails', next)
+      form.setFieldValue('thumbnails', [{ order: 1, url: reader.result as string }])
     }
     reader.readAsDataURL(file)
     return Upload.LIST_IGNORE
   }
 
   function handleRemove() {
-    form.setFieldValue('thumbnails', thumbnails.filter((t) => t.order !== order))
+    form.setFieldValue('thumbnails', [])
   }
 
   return (
-    <Flex vertical align="center" gap={4}>
-      <Tag color="blue">第 {order} 顺位</Tag>
+    <Flex vertical gap={4}>
       {slot ? (
         <div style={{ position: 'relative', width: 156, height: 54 }}>
           <img
             src={slot.url}
-            alt={`顺位 ${order}`}
-            style={{ width: 156, height: 54, objectFit: 'cover', borderRadius: 4, border: '1px solid var(--ant-color-border)' }}
+            alt="缩略图标签"
+            style={{ width: 156, height: 54, objectFit: 'cover', borderRadius: 4, border: `1px solid ${token.colorBorder}` }}
           />
           {!readonly && (
             <Button
@@ -1157,28 +1193,31 @@ function ThumbnailUploadSlot({
           )}
         </div>
       ) : (
-        <Upload
-          showUploadList={false}
-          beforeUpload={handleUpload}
-          disabled={readonly}
-        >
-          <div
-            style={{
-              width: 156,
-              height: 54,
-              border: '1px dashed var(--ant-color-border)',
-              borderRadius: 4,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: readonly ? 'default' : 'pointer',
-              color: 'var(--ant-color-text-quaternary)',
-              fontSize: 20,
-            }}
+        <div style={{ position: 'relative', width: 156, height: 54 }}>
+          <Upload
+            showUploadList={false}
+            beforeUpload={handleUpload}
+            disabled={readonly}
           >
-            <PlusOutlined />
-          </div>
-        </Upload>
+            <div
+              style={{
+                width: 156,
+                height: 54,
+                border: `1px dashed ${token.colorBorder}`,
+                borderRadius: 4,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: readonly ? 'default' : 'pointer',
+                color: token.colorTextQuaternary,
+                fontSize: 20,
+              }}
+            >
+              <PlusOutlined />
+            </div>
+          </Upload>
+          <Tag color="blue" style={{ position: 'absolute', top: 0, right: 0, margin: 0, borderRadius: '0 4px 0 4px', fontSize: 12, lineHeight: '20px', height: 20 }}>标签展示</Tag>
+        </div>
       )}
     </Flex>
   )

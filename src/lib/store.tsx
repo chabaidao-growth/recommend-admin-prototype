@@ -50,7 +50,7 @@ export function canEditEntity(entity: { createdBy: string }): boolean {
 
 const STORAGE_KEY = 'recommend-admin-store'
 const VERSION_KEY = 'recommend-admin-data-version'
-const DATA_VERSION = '20260515v3'
+const DATA_VERSION = '20260518v1'
 const AdminStoreContext = createContext<AdminStoreValue | null>(null)
 
 function replaceItem<T extends { id: string }>(items: T[], next: T) {
@@ -195,10 +195,10 @@ export function AdminStoreProvider({ children }: PropsWithChildren) {
         status: 'ACTIVE',
         createdAt: '2026-03-16 10:20',
         createdBy: CURRENT_USER,
-        slotCount: 6,
+        slotCount: 3,
         categoryLimit: null,  // 已废弃
         sessionDedup: true,
-        slots: Array.from({ length: 6 }, () => ({ id: createId('slot'), strategyId: null as string | null })),
+        slots: Array.from({ length: 3 }, () => ({ id: createId('slot'), strategyId: null as string | null })),
       }
       setState((current) => ({
         ...current,

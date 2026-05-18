@@ -53,7 +53,7 @@ export interface Strategy {
   poolId: string
   mode: StrategyMode
   status: 'ACTIVE' | 'INACTIVE'
-  sortDimension: 'SALES_COUNT' | 'SALES_AMOUNT'
+  sortDimension: 'SALES_COUNT' | 'SALES_AMOUNT' | 'REPURCHASE_RATE'
   timeWindow: '7D' | '14D' | '30D'
   fallbackStrategyId: string | null
   salesDataSource: 'NATIONAL' | 'STORE'

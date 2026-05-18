@@ -5,40 +5,16 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
-import { Button, Dropdown, Empty, Input, Modal, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd'
+import { Button, Dropdown, Empty, Input, message, Modal, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   estimateCombinationCoverage,
   formatDate,
-  getPoolProducts,
-  strategyMap,
 } from '../lib/domain'
 import { canEditEntity, useAdminStore } from '../lib/store'
 import type { Combination } from '../lib/types'
-
-function deriveBusinessUnit(
-  state: ReturnType<typeof useAdminStore>['state'],
-  combinationId: string,
-) {
-  const combination = state.combinations.find((item) => item.id === combinationId)
-  if (!combination) return '未分类'
-
-  const strategiesById = strategyMap(state)
-  const categories = new Set<string>()
-
-  combination.slots.forEach((slot) => {
-    if (!slot.strategyId) return
-    const strategy = strategiesById[slot.strategyId]
-    if (!strategy) return
-    getPoolProducts(state, strategy.poolId).forEach((product) => categories.add(product.category))
-  })
-
-  if (!categories.size) return '未分类'
-  if (categories.size === 1) return Array.from(categories)[0]
-  return '综合'
-}
 
 interface CombinationRow {
   key: string
@@ -48,8 +24,8 @@ interface CombinationRow {
   slotCount: number
   coverage: number
   createdAt: string
-  businessUnit: string
   createdBy: string
+  hasDeletedStrategy: boolean
 }
 
 export function CombinationsListPage() {
@@ -57,52 +33,62 @@ export function CombinationsListPage() {
   const { state, createCombination, updateCombination, copyCombination, deleteCombination } = useAdminStore()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
-  const [businessFilter, setBusinessFilter] = useState('ALL')
   const [currentPage, setCurrentPage] = useState(1)
 
-  const combinations = state.combinations.map((combination) => {
-    const businessUnit = deriveBusinessUnit(state, combination.id)
+  const combinations = state.combinations.map((combination) => ({
+    combination,
+    coverage: estimateCombinationCoverage(state, combination),
+  }))
 
-    return {
-      combination,
-      businessUnit,
-      coverage: estimateCombinationCoverage(state, combination),
-    }
-  })
-
-  const businessOptions = Array.from(new Set(combinations.map((item) => item.businessUnit))).sort((left, right) =>
-    left.localeCompare(right, 'zh-CN'),
-  )
-
-  const filteredCombinations = combinations.filter(({ combination, businessUnit }) => {
+  const filteredCombinations = combinations.filter(({ combination }) => {
     const keyword = search.trim().toLowerCase()
     const matchesSearch =
       keyword.length === 0 ||
       combination.name.toLowerCase().includes(keyword) ||
       combination.id.toLowerCase().includes(keyword)
     const matchesStatus = statusFilter === 'ALL' || combination.status === statusFilter
-    const matchesBusiness = businessFilter === 'ALL' || businessUnit === businessFilter
-    return matchesSearch && matchesStatus && matchesBusiness
+    return matchesSearch && matchesStatus
   })
 
   const dataSource: CombinationRow[] = useMemo(() => {
-    return filteredCombinations.map(({ combination, coverage, businessUnit }) => ({
-      key: combination.id,
-      name: combination.name,
-      id: combination.id,
-      status: combination.status,
-      slotCount: combination.slotCount,
-      coverage,
-      createdAt: combination.createdAt,
-      businessUnit,
-      createdBy: combination.createdBy,
-    }))
-  }, [filteredCombinations])
+    return filteredCombinations.map(({ combination, coverage }) => {
+      const hasDeletedStrategy = combination.slots.some(
+        (slot) => slot.strategyId && !state.strategies.some((s) => s.id === slot.strategyId),
+      )
+      return {
+        key: combination.id,
+        name: combination.name,
+        id: combination.id,
+        status: combination.status,
+        slotCount: combination.slotCount,
+        coverage,
+        createdAt: combination.createdAt,
+        createdBy: combination.createdBy,
+        hasDeletedStrategy,
+      }
+    })
+  }, [filteredCombinations, state.strategies])
 
   function handleToggleStatus(record: CombinationRow) {
     const combination = state.combinations.find((item) => item.id === record.id)
     if (!combination) return
-    updateCombination(record.id, { ...combination, status: combination.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' })
+    const next = combination.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+    if (next === 'ACTIVE') {
+      const inactiveStrategyNames: string[] = []
+      combination.slots.forEach((slot) => {
+        const s = state.strategies.find((item) => item.id === slot.strategyId)
+        if (!s) {
+          inactiveStrategyNames.push('已删除的策略')
+        } else if (s.status !== 'ACTIVE') {
+          inactiveStrategyNames.push(s.name)
+        }
+      })
+      if (inactiveStrategyNames.length > 0) {
+        message.error(`以下策略未启用，无法启用组合：${inactiveStrategyNames.join('、')}`)
+        return
+      }
+    }
+    updateCombination(record.id, { ...combination, status: next })
   }
 
   function handleCopyAndNavigate(id: string) {
@@ -128,7 +114,10 @@ export function CombinationsListPage() {
       key: 'name',
       render: (_, record) => (
         <Space direction="vertical" size={0}>
-          <Typography.Text strong>{record.name}</Typography.Text>
+          <Space>
+            <Typography.Text strong>{record.name}</Typography.Text>
+            {record.hasDeletedStrategy && <Tag color="error">关联的排序策略已删除</Tag>}
+          </Space>
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>{record.id}</Typography.Text>
         </Space>
       ),
@@ -259,14 +248,6 @@ export function CombinationsListPage() {
               { label: '启用', value: 'ACTIVE' },
               { label: '停用', value: 'INACTIVE' },
             ]}
-          />
-          <Select
-            placeholder="业务线"
-            allowClear
-            style={{ width: 140 }}
-            value={businessFilter === 'ALL' ? undefined : businessFilter}
-            onChange={(v) => setBusinessFilter(v || 'ALL')}
-            options={businessOptions.map((option) => ({ value: option, label: option }))}
           />
         </Space>
         <Button

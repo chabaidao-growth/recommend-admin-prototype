@@ -530,32 +530,6 @@ const ALL_PERMISSIONS = [
   'role:read', 'role:write',
 ]
 
-const ADMIN_PERMISSIONS = ALL_PERMISSIONS.filter(p => !p.startsWith('user:') && !p.startsWith('role:'))
-
-const MINIAPP_CONFIG_PERMISSIONS = [
-  'pool:read',
-  'strategy:read', 'strategy:write',
-  'combination:read', 'combination:write',
-  'monitoring:read',
-  'preview:read',
-]
-
-const PRODUCT_OPS_PERMISSIONS = [
-  'pool:read', 'pool:write',
-  'strategy:read',
-  'combination:read',
-  'monitoring:read',
-  'preview:read',
-]
-
-const OPERATOR_PERMISSIONS = [
-  'pool:read', 'pool:write',
-  'combination:read', 'combination:write',
-  'monitoring:read',
-]
-
-const VIEWER_PERMISSIONS = ALL_PERMISSIONS.filter(p => p.endsWith(':read'))
-
 const ROLES: Role[] = [
   {
     id: 'role-super-admin',
@@ -566,56 +540,6 @@ const ROLES: Role[] = [
     createdAt: '2026-01-01 10:00',
     createdBy: 'system',
     kind: 'SYSTEM',
-  },
-  {
-    id: 'role-admin',
-    name: '管理员',
-    code: 'CUSTOM',
-    description: '业务全部权限，不含用户/角色管理（初始化预置，可改可删）',
-    permissions: ADMIN_PERMISSIONS,
-    createdAt: '2026-01-01 10:00',
-    createdBy: 'system',
-    kind: 'CUSTOM',
-  },
-  {
-    id: 'role-miniapp-config',
-    name: '小程序配置',
-    code: 'CUSTOM',
-    description: '排序策略、策略组合读写，选品池只读，效果监控只读',
-    permissions: MINIAPP_CONFIG_PERMISSIONS,
-    createdAt: '2026-01-01 10:00',
-    createdBy: 'system',
-    kind: 'CUSTOM',
-  },
-  {
-    id: 'role-product-ops',
-    name: '商品运营',
-    code: 'CUSTOM',
-    description: '选品池读写，策略/组合只读，效果监控只读',
-    permissions: PRODUCT_OPS_PERMISSIONS,
-    createdAt: '2026-01-01 10:00',
-    createdBy: 'system',
-    kind: 'CUSTOM',
-  },
-  {
-    id: 'role-operator',
-    name: '运营人员',
-    code: 'CUSTOM',
-    description: '选品池、策略组合读写，效果监控只读',
-    permissions: OPERATOR_PERMISSIONS,
-    createdAt: '2026-01-01 10:00',
-    createdBy: 'system',
-    kind: 'CUSTOM',
-  },
-  {
-    id: 'role-viewer',
-    name: '观察者',
-    code: 'CUSTOM',
-    description: '全局只读权限',
-    permissions: VIEWER_PERMISSIONS,
-    createdAt: '2026-01-01 10:00',
-    createdBy: 'system',
-    kind: 'CUSTOM',
   },
 ]
 

@@ -199,9 +199,25 @@ export function CombinationEditPage() {
   }
 
   function handleToggleStatus() {
+    const next = draft!.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+    if (next === 'ACTIVE') {
+      const inactiveStrategyNames: string[] = []
+      draft!.slots.forEach((slot) => {
+        const s = state.strategies.find((item) => item.id === slot.strategyId)
+        if (!s) {
+          inactiveStrategyNames.push('已删除的策略')
+        } else if (s.status !== 'ACTIVE') {
+          inactiveStrategyNames.push(s.name)
+        }
+      })
+      if (inactiveStrategyNames.length > 0) {
+        message.error(`以下策略未启用，无法启用组合：${inactiveStrategyNames.join('、')}`)
+        return
+      }
+    }
     updateCombination(draft!.id, {
       ...draft!,
-      status: draft!.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE',
+      status: next,
     })
   }
 
@@ -290,17 +306,6 @@ export function CombinationEditPage() {
                   <Typography.Text style={{ width: 72, flexShrink: 0 }}>坑位数</Typography.Text>
                 {readonly ? (
                   <Typography.Text>{draft.slotCount}</Typography.Text>
-                ) : !isNewSession ? (
-                  <Tooltip title="保存后不可修改坑位数，如需调整请通过「复制」生成新组合">
-                    <InputNumber
-                      value={draft.slotCount}
-                      min={1}
-                      max={50}
-                      precision={0}
-                      disabled
-                      style={{ width: 120 }}
-                    />
-                  </Tooltip>
                 ) : (
                   <InputNumber
                     value={draft.slotCount}
@@ -462,6 +467,9 @@ function SlotCard({
                   style: item.status === 'INACTIVE' ? { color: 'var(--ant-color-text-tertiary)' } : undefined,
                 }))}
             />
+            {slot.strategyId && !state.strategies.some((item) => item.id === slot.strategyId) && (
+              <Tag color="error">关联的排序策略已删除</Tag>
+            )}
             {pool && (
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                 选品来源：{pool.name}

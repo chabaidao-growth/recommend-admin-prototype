@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import {
   Alert,
   Avatar,
@@ -43,6 +43,7 @@ const { Title, Text } = Typography
 export function PoolDetailPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { state, updatePool, deletePool } = useAdminStore()
   const pool = state.pools.find((p) => p.id === id)
   const productsById = productMap(state)
@@ -55,9 +56,11 @@ export function PoolDetailPage() {
   const [addDrawerOpen, setAddDrawerOpen] = useState(false)
   const [addSearchQuery, setAddSearchQuery] = useState('')
   const [selectedAddKeys, setSelectedAddKeys] = useState<React.Key[]>([])
+  const isNewSession = (location.state as any)?.isNew === true
+  const [hasSaved, setHasSaved] = useState(false)
 
   // 基础信息编辑态
-  const [editingInfo, setEditingInfo] = useState(false)
+  const [editingInfo, setEditingInfo] = useState(isNewSession)
   const [nameDraft, setNameDraft] = useState('')
   const [descDraft, setDescDraft] = useState('')
 
@@ -65,6 +68,14 @@ export function PoolDetailPage() {
     const timer = setTimeout(() => setDebouncedQuery(query), 300)
     return () => clearTimeout(timer)
   }, [query])
+
+  // 新建模式：初始化编辑草稿
+  useEffect(() => {
+    if (isNewSession && !hasSaved && pool) {
+      setNameDraft(pool.name)
+      setDescDraft(pool.description || '')
+    }
+  }, [isNewSession, hasSaved, pool?.id])
 
   if (!pool) {
     return (
@@ -109,7 +120,7 @@ export function PoolDetailPage() {
 
   // Import parsing
   const parsedTokens = importText
-    .split(/[\s,]+/)
+    .split(',')
     .map((t) => t.trim())
     .filter(Boolean)
   const allUniqueTokens = [...new Set(parsedTokens)]
@@ -169,10 +180,16 @@ export function PoolDetailPage() {
   function saveInfo() {
     updatePool(pool!.id, { ...pool!, name: nameDraft.trim() || pool!.name, description: descDraft.trim() })
     setEditingInfo(false)
+    setHasSaved(true)
     message.success('基础信息已保存')
   }
 
   function cancelEditInfo() {
+    if (isNewSession && !hasSaved) {
+      deletePool(pool!.id)
+      navigate('/pools')
+      return
+    }
     setEditingInfo(false)
   }
 
@@ -254,7 +271,12 @@ export function PoolDetailPage() {
         <Button
           type="text"
           icon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/pools')}
+          onClick={() => {
+            if (isNewSession && !hasSaved) {
+              deletePool(pool!.id)
+            }
+            navigate('/pools')
+          }}
         />
         <Title level={4} style={{ margin: 0 }}>{pool.name}</Title>
         {isSystem && <Tag color="blue">系统内置</Tag>}
@@ -282,6 +304,14 @@ export function PoolDetailPage() {
                 <Button
                   onClick={() => {
                     if (pool.status === 'ACTIVE') {
+                      const activeStrategies = state.strategies.filter((s) => s.poolId === pool.id && s.status === 'ACTIVE')
+                      if (activeStrategies.length > 0) {
+                        Modal.warning({
+                          title: '无法停用',
+                          content: `以下策略仍在启用中，请先停用后再停用选品池：${activeStrategies.map((s) => s.name).join('、')}`,
+                        })
+                        return
+                      }
                       Modal.confirm({
                         title: '确认停用',
                         content: '停用后，使用此选品池的排序策略将无法获取候选商品。确定停用？',
@@ -326,47 +356,40 @@ export function PoolDetailPage() {
                     danger
                     icon={<DeleteOutlined />}
                     onClick={() => {
-                      if (references.length > 0) {
-                        Modal.warning({
-                          title: '无法删除',
-                          content: `该选品池被 ${references.length} 个排序策略使用，无法删除。请先解除关联。`,
-                        })
-                      } else {
-                        Modal.confirm({
-                          title: '确认删除',
-                          icon: null,
-                          content: (
-                            <Flex vertical gap={12}>
-                              <Text>确认删除选品池「{pool.name}」吗？删除后不可恢复。</Text>
-                              <div>
-                                <Text type="secondary" style={{ fontSize: 13 }}>请输入选品池名称以确认：</Text>
-                                <Input
-                                  placeholder={pool.name}
-                                  id="delete-confirm-input"
-                                  style={{ marginTop: 4 }}
-                                  onChange={(e) => {
-                                    const btn = document.querySelector('.ant-modal-confirm-btns .ant-btn-dangerous') as HTMLButtonElement | null
-                                    if (btn) btn.disabled = e.target.value.trim() !== pool.name
-                                  }}
-                                />
-                              </div>
-                            </Flex>
-                          ),
-                          okText: '确认删除',
-                          cancelText: '取消',
-                          okButtonProps: { danger: true, disabled: true },
-                          onOk() {
-                            const input = document.getElementById('delete-confirm-input') as HTMLInputElement | null
-                            if (input?.value.trim() !== pool.name) {
-                              message.error('名称输入不一致，无法删除')
-                              return Promise.reject()
-                            }
-                            deletePool(pool.id)
-                            message.success('已删除')
-                            navigate('/pools')
-                          },
-                        })
-                      }
+                      Modal.confirm({
+                        title: '确认删除',
+                        icon: null,
+                        content: (
+                          <Flex vertical gap={12}>
+                            <Text>确认删除选品池「{pool.name}」吗？删除后不可恢复。</Text>
+                            <div>
+                              <Text type="secondary" style={{ fontSize: 13 }}>请输入选品池名称以确认：</Text>
+                              <Input
+                                placeholder={pool.name}
+                                id="delete-confirm-input"
+                                style={{ marginTop: 4 }}
+                                onChange={(e) => {
+                                  const btn = document.querySelector('.ant-modal-confirm-btns .ant-btn-dangerous') as HTMLButtonElement | null
+                                  if (btn) btn.disabled = e.target.value.trim() !== pool.name
+                                }}
+                              />
+                            </div>
+                          </Flex>
+                        ),
+                        okText: '确认删除',
+                        cancelText: '取消',
+                        okButtonProps: { danger: true, disabled: true },
+                        onOk() {
+                          const input = document.getElementById('delete-confirm-input') as HTMLInputElement | null
+                          if (input?.value.trim() !== pool.name) {
+                            message.error('名称输入不一致，无法删除')
+                            return Promise.reject()
+                          }
+                          deletePool(pool.id)
+                          message.success('已删除')
+                          navigate('/pools')
+                        },
+                      })
                     }}
                   >
                     删除
@@ -653,7 +676,7 @@ export function PoolDetailPage() {
       >
         <Flex vertical gap={16}>
           <Text type="secondary">
-            粘贴商品标识，支持逗号、空格、换行分隔（上限 500 个）
+            粘贴商品标识，仅支持英文逗号分隔（上限 500 个）
           </Text>
           <Input.TextArea
             rows={5}
