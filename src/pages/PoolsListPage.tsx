@@ -84,6 +84,7 @@ export function PoolsListPage() {
   }, [state.pools, debouncedQuery, statusFilter, kindFilter])
 
   function handleToggleStatus(record: PoolRow) {
+    if (record.kind === 'SYSTEM') return
     const pool = state.pools.find((p) => p.id === record.id)
     if (!pool) return
     const next = pool.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
@@ -184,6 +185,7 @@ export function PoolsListPage() {
       key: 'action',
       width: 200,
       render: (_, record) => {
+        const isSystem = record.kind === 'SYSTEM'
         const canOperate = canEditEntity(record)
         const isActive = record.status === 'ACTIVE'
         return (
@@ -191,7 +193,13 @@ export function PoolsListPage() {
             <Button type="link" size="small" style={{ padding: 0 }} onClick={() => navigate(`/pools/${record.id}`)}>
               查看
             </Button>
-            {canOperate ? (
+            {isSystem ? (
+              <Tooltip title="系统内置全量池，不可停用">
+                <Button type="link" size="small" style={{ padding: 0 }} disabled>
+                  {isActive ? '停用' : '启用'}
+                </Button>
+              </Tooltip>
+            ) : canOperate ? (
               <Button type="link" size="small" style={{ padding: 0 }} onClick={() => handleToggleStatus(record)}>
                 {isActive ? '停用' : '启用'}
               </Button>
@@ -205,7 +213,12 @@ export function PoolsListPage() {
             <Dropdown
               menu={{
                 items: [
-                  canOperate ? {
+                  isSystem ? {
+                    key: 'edit',
+                    label: '编辑',
+                    icon: <EditOutlined />,
+                    disabled: true,
+                  } : canOperate ? {
                     key: 'edit',
                     label: '编辑',
                     icon: <EditOutlined />,
@@ -215,7 +228,7 @@ export function PoolsListPage() {
                     key: 'delete',
                     label: <span style={{ color: 'var(--ant-color-error)' }}>删除</span>,
                     icon: <DeleteOutlined style={{ color: 'var(--ant-color-error)' }} />,
-                    disabled: isActive || !canOperate,
+                    disabled: isSystem || isActive || !canOperate,
                     onClick: () => handleDelete(record),
                   },
                 ].filter(Boolean),
