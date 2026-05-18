@@ -193,50 +193,43 @@ export function PoolsListPage() {
             <Button type="link" size="small" style={{ padding: 0 }} onClick={() => navigate(`/pools/${record.id}`)}>
               查看
             </Button>
-            {isSystem ? (
-              <Tooltip title="系统内置全量池，不可停用">
-                <Button type="link" size="small" style={{ padding: 0 }} disabled>
+            {!isSystem && (
+              canOperate ? (
+                <Button type="link" size="small" style={{ padding: 0 }} onClick={() => handleToggleStatus(record)}>
                   {isActive ? '停用' : '启用'}
                 </Button>
-              </Tooltip>
-            ) : canOperate ? (
-              <Button type="link" size="small" style={{ padding: 0 }} onClick={() => handleToggleStatus(record)}>
-                {isActive ? '停用' : '启用'}
-              </Button>
-            ) : (
-              <Tooltip title="无权限编辑（仅创建人或超管可编辑）">
-                <Button type="link" size="small" style={{ padding: 0 }} disabled>
-                  {isActive ? '停用' : '启用'}
-                </Button>
-              </Tooltip>
+              ) : (
+                <Tooltip title="无权限编辑（仅创建人或超管可编辑）">
+                  <Button type="link" size="small" style={{ padding: 0 }} disabled>
+                    {isActive ? '停用' : '启用'}
+                  </Button>
+                </Tooltip>
+              )
             )}
-            <Dropdown
-              menu={{
-                items: [
-                  isSystem ? {
-                    key: 'edit',
-                    label: '编辑',
-                    icon: <EditOutlined />,
-                    disabled: true,
-                  } : canOperate ? {
-                    key: 'edit',
-                    label: '编辑',
-                    icon: <EditOutlined />,
-                    onClick: () => navigate(`/pools/${record.id}`),
-                  } : null,
-                  {
-                    key: 'delete',
-                    label: <span style={{ color: 'var(--ant-color-error)' }}>删除</span>,
-                    icon: <DeleteOutlined style={{ color: 'var(--ant-color-error)' }} />,
-                    disabled: isSystem || isActive || !canOperate,
-                    onClick: () => handleDelete(record),
-                  },
-                ].filter(Boolean),
-              }}
-              trigger={['click']}
-            >
-              <Button type="text" size="small" icon={<MoreOutlined />} />
-            </Dropdown>
+            {!isSystem && (
+              <Dropdown
+                menu={{
+                  items: [
+                    canOperate ? {
+                      key: 'edit',
+                      label: '编辑',
+                      icon: <EditOutlined />,
+                      onClick: () => navigate(`/pools/${record.id}`),
+                    } : null,
+                    {
+                      key: 'delete',
+                      label: <span style={{ color: 'var(--ant-color-error)' }}>删除</span>,
+                      icon: <DeleteOutlined style={{ color: 'var(--ant-color-error)' }} />,
+                      disabled: isActive || !canOperate,
+                      onClick: () => handleDelete(record),
+                    },
+                  ].filter(Boolean),
+                }}
+                trigger={['click']}
+              >
+                <Button type="text" size="small" icon={<MoreOutlined />} />
+              </Dropdown>
+            )}
           </Space>
         )
       },
