@@ -1021,6 +1021,13 @@ function StrategyEditor({ strategy }: { strategy: Strategy }) {
                 <Form.Item label="兜底策略">
                   <Input value="系统终极兜底，无需配置" disabled />
                 </Form.Item>
+              ) : mode === 'NEW' || mode === 'MANUAL' ? (
+                <Form.Item label="兜底策略">
+                  <Flex align="center" gap={8}>
+                    <Tag>不兜底</Tag>
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>{modeMeta[mode].title}不配置兜底，候选耗尽时该坑位作废</Typography.Text>
+                  </Flex>
+                </Form.Item>
               ) : (
                 <>
                   <Form.Item label="兜底策略">

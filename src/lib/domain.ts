@@ -225,12 +225,15 @@ function pickProductFromStrategy(
 ) {
   const chain = [strategy]
 
-  let current: Strategy | undefined = strategy
-  while (current?.fallbackStrategyId) {
-    const fallback = state.strategies.find((item) => item.id === current?.fallbackStrategyId)
-    if (!fallback) break
-    chain.push(fallback)
-    current = fallback
+  // 新品排行(NEW)与人工定序(MANUAL)不配置兜底：候选耗尽即坑位作废，不沿兜底链取数
+  if (strategy.mode !== 'NEW' && strategy.mode !== 'MANUAL') {
+    let current: Strategy | undefined = strategy
+    while (current?.fallbackStrategyId) {
+      const fallback = state.strategies.find((item) => item.id === current?.fallbackStrategyId)
+      if (!fallback) break
+      chain.push(fallback)
+      current = fallback
+    }
   }
 
   for (const currentStrategy of chain) {
