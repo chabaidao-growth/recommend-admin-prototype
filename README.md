@@ -13,7 +13,7 @@
 
 完整版本映射见 [`PRD-LINKS.md`](./PRD-LINKS.md)。
 
-- 当前 PRD：[飞书文档 v3.2](https://swn7zpxv453.feishu.cn/docx/GCBXdFXtboAMk2xoPIPcB6uRnSf) / 本地副本 [`PRD.md`](./PRD.md)
+- 当前 PRD：[飞书文档 v3.8](https://swn7zpxv453.feishu.cn/docx/GCBXdFXtboAMk2xoPIPcB6uRnSf) / 本地副本 [`PRD.md`](./PRD.md)
 - 当前原型 tag：`v1.0`
 
 ## 核心架构

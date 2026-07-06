@@ -12,10 +12,10 @@
 | 仓库 | [chabaidao-growth/recommend-admin-prototype](https://github.com/chabaidao-growth/recommend-admin-prototype) |
 | 原型 tag | `v1.0` |
 | 预览 URL（GitHub Pages）| https://chabaidao-growth.github.io/recommend-admin-prototype/ |
-| PRD 飞书链接 | [推荐系统运营管理后台 PRD（v3.2）](https://swn7zpxv453.feishu.cn/docx/GCBXdFXtboAMk2xoPIPcB6uRnSf) |
+| PRD 飞书链接 | [推荐系统运营管理后台 PRD（v3.8）](https://swn7zpxv453.feishu.cn/docx/GCBXdFXtboAMk2xoPIPcB6uRnSf) |
 | 本地 PRD 副本 | [`PRD.md`](./PRD.md) |
-| PRD 版本 | v3.2（2026-05-13）|
-| 上线日期 | 2026-05-13 |
+| PRD 版本 | v3.8（2026-06-22）|
+| 上线日期 | 2026-06-22 |
 
 ---
 
@@ -23,6 +23,7 @@
 
 | 原型 tag | PRD 版本 | 上线日期 | 变更说明 |
 |---|---|---|---|
+| `v1.0` | v3.8 | 2026-06-22 | QA 确认口径沉淀：选品池商品分页与筛选调整、策略 / 组合引用启用态约束、MANUAL 最少商品校验、列表元信息补齐、权限菜单隐藏、上游删除 / 停用引用展示、推荐接口候选集硬约束与 T+1 口径。 |
 | `v1.0` | v3.2 | 2026-05-13 | 首个正式 tag。三层架构（删除投放计划层迁至装修）；策略组合层完整重构（资源位决定坑位数、组合 ID 自增、新建取消回滚、三层校验、查看-编辑切换）；商品候选池仅饮品 / MANUAL 跨品类；加权 α-β 公式；与装修系统衔接接口约定。 |
 
 ---
