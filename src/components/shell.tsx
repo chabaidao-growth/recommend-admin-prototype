@@ -5,7 +5,9 @@ import {
   BarChartOutlined,
   EyeOutlined,
   GiftOutlined,
+  NodeIndexOutlined,
   OrderedListOutlined,
+  RocketOutlined,
   SafetyOutlined,
   UserOutlined,
 } from '@ant-design/icons'
@@ -50,6 +52,35 @@ const menuItems: MenuProps['items'] = [
     icon: <BarChartOutlined />,
   },
   {
+    key: 'group-ma',
+    label: '营销自动化',
+    type: 'group',
+    children: [
+      {
+        key: '/ma/canvas',
+        label: <NavLink to="/ma/canvas">MA 营销画布</NavLink>,
+        icon: <NodeIndexOutlined />,
+      },
+    ],
+  },
+  {
+    key: 'group-realtime-coupon',
+    label: '实时发券（Q4）',
+    type: 'group',
+    children: [
+      {
+        key: '/coupons',
+        label: <NavLink to="/coupons">券池管理</NavLink>,
+        icon: <GiftOutlined />,
+      },
+      {
+        key: '/coupon-strategies',
+        label: <NavLink to="/coupon-strategies">发券策略</NavLink>,
+        icon: <RocketOutlined />,
+      },
+    ],
+  },
+  {
     key: 'group-tools',
     label: '工具 & 诊断',
     type: 'group',
@@ -85,6 +116,11 @@ const breadcrumbLabels: Record<string, string> = {
   strategies: '排序策略',
   combinations: '策略组合',
   monitoring: '效果监控',
+  ma: '营销自动化',
+  canvas: 'MA 营销画布',
+  coupons: '券池管理',
+  'coupon-strategies': '发券策略',
+  simple: '新建策略',
   preview: '全链路预览',
   users: '用户管理',
   roles: '角色管理',
@@ -99,12 +135,17 @@ function buildBreadcrumbs(pathname: string) {
     const part = parts[i]
     // 排序策略子页面：面包屑只到"排序策略"
     if (parts[0] === 'strategies' && i > 0) break
+    const push = (title: string) => {
+      if (items[items.length - 1].title !== title) items.push({ title })
+    }
     if (part === 'edit') {
-      items.push({ title: '编辑' })
+      push('编辑')
     } else if (breadcrumbLabels[part]) {
-      items.push({ title: breadcrumbLabels[part] })
+      push(breadcrumbLabels[part])
+    } else if (part === 'detail') {
+      push('详情')
     } else if (i > 0 && !breadcrumbLabels[part]) {
-      items.push({ title: '详情' })
+      push('详情')
     }
   }
 

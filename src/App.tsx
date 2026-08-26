@@ -3,7 +3,13 @@ import { AppShell } from './components/shell'
 import { AdminStoreProvider } from './lib/store'
 import { CombinationEditPage } from './pages/CombinationEditPage'
 import { CombinationsListPage } from './pages/CombinationsListPage'
+import { CouponPoolPage } from './pages/CouponPoolPage'
+import { CouponStrategiesPage } from './pages/CouponStrategiesPage'
+import { CouponStrategyDetailPage } from './pages/CouponStrategyDetailPage'
+import { CouponStrategyEditPage } from './pages/CouponStrategyEditPage'
+import { CouponStrategySimpleEditPage } from './pages/CouponStrategySimpleEditPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { MaCanvasPage } from './pages/MaCanvasPage'
 import { MonitoringPage } from './pages/MonitoringPage'
 import { PoolDetailPage } from './pages/PoolDetailPage'
 import { PoolsListPage } from './pages/PoolsListPage'
@@ -26,6 +32,12 @@ function App() {
             <Route path="/strategies/:id/edit" element={<StrategyEditPage />} />
             <Route path="/combinations" element={<CombinationsListPage />} />
             <Route path="/combinations/:id" element={<CombinationEditPage />} />
+            <Route path="/ma/canvas" element={<MaCanvasPage />} />
+            <Route path="/coupons" element={<CouponPoolPage />} />
+            <Route path="/coupon-strategies" element={<CouponStrategiesPage />} />
+            <Route path="/coupon-strategies/simple" element={<CouponStrategySimpleEditPage />} />
+            <Route path="/coupon-strategies/:id/edit" element={<CouponStrategyEditPage />} />
+            <Route path="/coupon-strategies/:id/detail" element={<CouponStrategyDetailPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/roles" element={<RolesListPage />} />
             <Route path="/users" element={<UsersListPage />} />
